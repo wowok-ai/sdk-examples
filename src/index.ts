@@ -6,8 +6,9 @@ import { objectids_from_response } from 'wowok/src/util'
 
 const main = async () => {
     await test_guard_sense_objects();
-    await test_guard_description();
-    await test_exes();
+    // await test_guard_description();
+    // await test_exes();
+
 }
 
 const test_guard_description = async () => {
@@ -18,6 +19,7 @@ const test_guard_description = async () => {
 
 const test_guard_sense_objects = async () => {
     let ids = new Map<string, string[]>();
+    objectids_from_response(await PROTOCOL.Sign_Excute(permission_test, SENDER_PRIV, PROTOCOL.EveryoneGuard()), ids);
     objectids_from_response(await PROTOCOL.Sign_Excute(permission_test, SENDER_PRIV, PROTOCOL.EveryoneGuard()), ids);
     console.log('permission id: ' + ids.get('permission::Permission'));
     objectids_from_response(await PROTOCOL.Sign_Excute(guard1_test, SENDER_PRIV, ids), ids);

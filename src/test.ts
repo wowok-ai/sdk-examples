@@ -1,3 +1,4 @@
+//@ts-ignore 
 import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { machine, Machine_Node, MachineObject, INITIAL_NODE_NAME, machine_remove_node, MachineNodeObject, 
     machine_add_node, machine_set_endpoint, machine_publish, launch as machine_launch} from 'wowok/src/machine';
@@ -9,7 +10,8 @@ import { service, service_add_sale, service_publish, service_pause, launch as se
     service_set_price, service_set_machine, service_add_stock, buy} from 'wowok/src/service';
 import { PROTOCOL, FnCallType, GuardObject, Data_Type } from 'wowok/src/protocol';
 import { SenseMaker, description_fn, Guard_Creation, Guard_Sense, Guard_Sense_Binder, 
-    launch as guard_launch} from 'wowok/src/guard';
+    launch as guard_launch,
+    signer_guard} from 'wowok/src/guard';
 
 
 export const ADDR = "0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f";
@@ -80,6 +82,7 @@ export const node3:Machine_Node = {
         ]},
     ]
 }
+
 export const machine_test = async(txb:TransactionBlock, param:any) => {
     let permission = txb.object(param.get('permission::Permission')[0] as string) as PermissionObject;
     
@@ -165,19 +168,20 @@ export const service_test_order = async(txb:TransactionBlock, param:any) => {
 
 // guard test ----------------
 export const guard1_test = async(txb:TransactionBlock, param:any) => {
-    let permission_id = param.get('permission::Permission')[0];
+    let permission_id1 = param.get('permission::Permission')[0];
+    let permission_id2 = param.get('permission::Permission')[1];
 
     let maker = new SenseMaker();
-    maker.add_cmd(permission_id, 0);
-    maker.add_param(Data_Type.TYPE_CONTEXT_SIGNER);
+    maker.add_cmd(permission_id1, 0);
+    maker.add_cmd(permission_id2, 0);
     maker.add_logic(Data_Type.TYPE_LOGIC_OPERATOR_EQUAL);
     const sense1 = maker.make(false, Guard_Sense_Binder.AND) as Guard_Sense;
     let guard_creation1:Guard_Creation = {
-        description: 'aaa',
+        description: 'two permissions\' creator equal',
         senses: [sense1, sense1]
     };
-    guard_launch(txb, guard_creation1);
-    guard_launch(txb, guard_creation1);
+    guard_launch(txb, guard_creation1); // guard1
+    signer_guard(txb); // guard2
 }
 export const guard2_test = async(txb:TransactionBlock, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
