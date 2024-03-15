@@ -1,0 +1,23 @@
+{
+  "name": "sdk-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "clean": "rmdir /S /Q dist",
+    "run": "node ./dist/index.js",
+    "build": "node ./dist/cjs/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@mysten/sui.js": "^0.44.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
