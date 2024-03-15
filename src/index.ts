@@ -1,12 +1,8 @@
-import { SuiClient, SuiObjectResponse } from '@mysten/sui.js/client';
-import { TransactionBlock, type TransactionResult } from '@mysten/sui.js/transactions';
-import { Ed25519Keypair } from '@mysten/sui.js/keypairs/ed25519';
-import { BCS, getSuiMoveConfig, toHEX, fromHEX, BcsReader } from '@mysten/bcs';
-import { PROTOCOL, Data_Type, Query_Param} from './protocol/protocol';
-import { SENDER_PRIV, permission_test, machine_test, service_test, service_test_order, progress_test, ADDR, guard1_test} from './test';
-import { sense_objects_fn, description_fn } from './protocol/guard';
-import { query_cmd_fn, Guard_Query_Object } from './protocol/passport';
-import { objectids_from_response } from './protocol/util'
+
+import { PROTOCOL, Data_Type, Query_Param} from 'wowok/src/protocol';
+import { SENDER_PRIV, permission_test, machine_test, service_test, service_test_order, progress_test, guard1_test} from './test';
+import { sense_objects_fn, description_fn } from 'wowok/src/guard';
+import { objectids_from_response } from 'wowok/src/util'
 
 const main = async () => {
     await test_guard_sense_objects();

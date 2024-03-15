@@ -1,23 +1,22 @@
 {
   "name": "sdk-test",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "type": "commonjs",
-  "engines": {
-    "node": ">=16"
-  },
+  "module": "node",
+  "type": "module",
   "scripts": {
-    "clean": "rmdir /S /Q dist",
-    "run": "node ./dist/index.js",
-    "build": "node ./dist/cjs/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "@mysten/sui.js": "^0.44.0"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@digitak/esrun": "^3.2.26",
+    "@mysten/bcs": "^0.11.1",
+    "@mysten/sui.js": "^0.50.1",
+    "esrun": "^3.2.26"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1"
+  }
 }
