@@ -10,8 +10,9 @@ import { service, service_add_sale, service_publish, service_pause, launch as se
     service_set_price, service_set_machine, service_add_stock, buy} from 'wowok/src/service';
 import { PROTOCOL, FnCallType, GuardObject, Data_Type } from 'wowok/src/protocol';
 import { SenseMaker, description_fn, Guard_Creation, Guard_Sense, Guard_Sense_Binder, 
-    launch as guard_launch,
-    signer_guard} from 'wowok/src/guard';
+    launch as guard_launch, signer_guard } from 'wowok/src/guard';
+import { demand, launch as demand_launch, deposit as demand_deposit } from 'wowok/src/demand';
+import { reward, launch as reward_launch, deposit as reward_deposit, Reward } from 'wowok/src/reward';
 
 
 export const ADDR = "0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f";
@@ -183,7 +184,7 @@ export const guard1_test = async(txb:TransactionBlock, param:any) => {
     guard_launch(txb, guard_creation1); // guard1
     signer_guard(txb); // guard2
 }
-export const guard2_test = async(txb:TransactionBlock, param:any) => {
+export const guard2_test = async (txb:TransactionBlock, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
 
     let maker = new SenseMaker();
@@ -197,4 +198,24 @@ export const guard2_test = async(txb:TransactionBlock, param:any) => {
         senses: [sense1, sense1]
     };
     guard_launch(txb, guard_creation1);
+}
+
+// demand test -------------
+const earnest_type = '0x2::coin::Coin<0x2::sui::SUI>';
+
+export const demand_test = async (txb:TransactionBlock, param:any) => {
+    let permission_id = param.get('permission::Permission')[0];
+    let d = demand(earnest_type, txb, txb.object(permission_id) as PermissionObject, 
+        'demand...', txb.splitCoins(txb.gas, [10000000]));
+    demand_deposit(earnest_type, txb, d, txb.splitCoins(txb.gas,[200000]));
+    demand_launch(earnest_type, txb, d);
+}
+
+export const reward_test = async (txb:TransactionBlock, param:any) => {
+    let permission_id = param.get('permission::Permission')[0];
+    let w = reward(earnest_type, txb, txb.object(permission_id) as PermissionObject,
+        'reward hhh', 10000);
+    let rewards = [txb.splitCoins(txb.gas, [111]), txb.splitCoins(txb.gas, [222])];
+    reward_deposit(earnest_type, txb, w, rewards);
+    reward_launch(earnest_type, txb, w);
 }
