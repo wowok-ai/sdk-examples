@@ -12,8 +12,9 @@ import { PROTOCOL, FnCallType, GuardObject, Data_Type } from 'wowok/src/protocol
 import { SenseMaker, description_fn, Guard_Creation, Guard_Sense, Guard_Sense_Binder, 
     launch as guard_launch, signer_guard } from 'wowok/src/guard';
 import { demand, launch as demand_launch, deposit as demand_deposit } from 'wowok/src/demand';
-import { reward, launch as reward_launch, deposit as reward_deposit, Reward } from 'wowok/src/reward';
-
+import { reward, launch as reward_launch, deposit as reward_deposit, claim } from 'wowok/src/reward';
+import { repository, launch as repository_launch, add_data, Repository_Policy_Mode, Repository_Policy_Data} from 'wowok/src/repository'
+import { stringToUint8Array } from 'wowok/src/util'
 
 export const ADDR = "0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f";
 export const SENDER_PRIV = "0xc9bbc30f72ef7d9aa674a3be1448b9267141a676b59f3f4315231617a5bbc0e8";
@@ -217,5 +218,19 @@ export const reward_test = async (txb:TransactionBlock, param:any) => {
         'reward hhh', 10000);
     let rewards = [txb.splitCoins(txb.gas, [111]), txb.splitCoins(txb.gas, [222])];
     reward_deposit(earnest_type, txb, w, rewards);
+    claim(earnest_type, txb, w);
     reward_launch(earnest_type, txb, w);
+}
+
+export const repository_test = async (txb:TransactionBlock, param:any) => {
+    let permission_id = param.get('permission::Permission')[0];
+    let p = txb.object(permission_id) as PermissionObject;
+    let r = repository(txb, p, 'repo....', Repository_Policy_Mode.POLICY_MODE_FREE);
+    let data:Repository_Policy_Data = {name:'test1', data:[
+        {address:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f', value:stringToUint8Array('abcd')},
+    ], value_type:Data_Type.TYPE_STATIC_vec_u8}
+
+    console.log(data);
+    add_data(txb, r, p, data);
+    repository_launch(txb, r);
 }
