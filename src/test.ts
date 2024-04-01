@@ -13,7 +13,7 @@ import { SenseMaker, description_fn, Guard_Creation, Guard_Sense, Guard_Sense_Bi
     launch as guard_launch, signer_guard } from 'wowok/src/guard';
 import { demand, launch as demand_launch, deposit as demand_deposit } from 'wowok/src/demand';
 import { reward, launch as reward_launch, deposit as reward_deposit, claim } from 'wowok/src/reward';
-import { repository, launch as repository_launch, add_data, Repository_Policy_Mode, Repository_Policy_Data} from 'wowok/src/repository'
+import { repository, launch as repository_launch, Repository_Policy, add_data, Repository_Policy_Mode, Repository_Policy_Data, repository_add_policies} from 'wowok/src/repository'
 import { stringToUint8Array } from 'wowok/src/util'
 
 export const ADDR = "0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f";
@@ -230,7 +230,21 @@ export const repository_test = async (txb:TransactionBlock, param:any) => {
         {address:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f', value:stringToUint8Array('abcd')},
     ], value_type:Data_Type.TYPE_STATIC_vec_u8}
 
-    console.log(data);
     add_data(txb, r, p, data);
+
+    let po1:Repository_Policy = {
+        name:'p1',
+        description:'some words....',
+        value_type:Data_Type.TYPE_STATIC_vec_u8,
+    };
+    let po2:Repository_Policy = {
+        name:'p2',
+        description:'xxx some words....',
+        value_type:Data_Type.TYPE_STATIC_vec_u8,
+        permission: 10002,
+    };
+
+
+    repository_add_policies(txb, r, p, [po1, po2]);
     repository_launch(txb, r);
 }

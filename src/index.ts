@@ -3,9 +3,10 @@ import { PROTOCOL, Data_Type, Query_Param, ENTRYPOINT} from 'wowok/src/protocol'
 import { SENDER_PRIV, permission_test, machine_test, service_test, service_test_order, 
     progress_test, guard1_test, demand_test, reward_test, repository_test} from './test';
 import { sense_objects_fn, description_fn } from 'wowok/src/guard';
-import { objectids_from_response } from 'wowok/src/util'
+import { objectids_from_response, stringToUint8Array } from 'wowok/src/util'
 import { SuiClient, SuiObjectResponse, SuiObjectDataOptions, SuiTransactionBlockResponseOptions, 
     SuiTransactionBlockResponse, SuiObjectChange, GetOwnedObjectsParams } from '@mysten/sui.js/client';
+import { bcs } from '@mysten/sui.js/bcs'
 
 const main = async () => {
     // await test_guard_sense_objects();
@@ -13,8 +14,22 @@ const main = async () => {
     PROTOCOL.UseNetwork(ENTRYPOINT.testnet);
     await test_exes();
     // await test_child();
+    // test_bcs()
 }
 
+const test_bcs = () => {
+    var w = atob('44a7ngGzUot183Ua2KHkGLIHrZef6jZAh97vUlCnPT8=');
+    console.log(w);
+
+    console.log(bcs.Address.parse(stringToUint8Array(w)));
+
+    w = atob('AQV0ZXN0MQVpYWJjZA==');
+    let res = bcs.vector(bcs.struct("data", {
+        key:bcs.string(),
+        value: bcs.vector(bcs.u8()),
+    })).parse(stringToUint8Array(w));
+    console.log(res)
+}
 const test_child = async () => {
     const client =  new SuiClient({ url: "https://fullnode.testnet.sui.io:443" });  
     let id = '0x049708ea1c4b4a66531b79adeb2d9075dfa4a04dd41736bfd419541d107e3445';
@@ -45,10 +60,11 @@ const test_exes = async () => {
     let ids = new Map<string, string[]>();
     objectids_from_response(await PROTOCOL.Sign_Excute(permission_test, SENDER_PRIV, PROTOCOL.EveryoneGuard()), ids);
     console.log('permission id: ' + ids.get('permission::Permission'));
+    objectids_from_response(await PROTOCOL.Sign_Excute(repository_test, SENDER_PRIV, ids), ids);
+    console.log('repository id: ' + ids.get('repository::Repository'));
     objectids_from_response(await PROTOCOL.Sign_Excute(reward_test, SENDER_PRIV, ids), ids);
     console.log('reward id: ' + ids.get('reward::Reward'));
-    /*objectids_from_response(await PROTOCOL.Sign_Excute(repository_test, SENDER_PRIV, ids), ids);
-    console.log('repository id: ' + ids.get('repository::Repository'));
+
     objectids_from_response(await PROTOCOL.Sign_Excute(demand_test, SENDER_PRIV, ids), ids);
     console.log('demand id: ' + ids.get('demand::Demand'));
     objectids_from_response(await PROTOCOL.Sign_Excute(machine_test, SENDER_PRIV, ids), ids);
@@ -60,7 +76,7 @@ const test_exes = async () => {
     console.log('order id: ' + ids.get('order::Order'));
     console.log('progress id: ' + ids.get('progress::Progress'));
     let resp1 = await PROTOCOL.Sign_Excute(progress_test, SENDER_PRIV, ids);
-    console.log(resp1);*/
+    console.log(resp1);
 }
 
 main().catch(console.error)
