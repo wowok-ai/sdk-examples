@@ -1,2 +1,2 @@
-# sdk-examples
-wowok protocol sdk sdk-examples
+# sdk-tests
+some tests for wowok protocol sdk 
