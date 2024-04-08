@@ -10,6 +10,7 @@ import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_
     test_guard_launch_number, } from './gurad'
 import { test_repository_launch, test_repository_policy } from './repository'
 import { test_machine_edit_nodes, test_machine_launch, test_machine_progress, test_progress_run1, test_progress_run2 } from './machine';
+import { test_service_launch, test_service_order, test_service_withdraw } from './service';
 
 const main = async () => {
     // await test_guard_sense_objects();
@@ -58,9 +59,7 @@ const test_guard_sense_objects = async () => {
     console.log(param2)
 }
 
-const exefuncs = (funcs:[]) => {
-    funcs.forEach((f) => f)
-}
+
 const test_exes = async () => {
     let ids = new Map<string, string[]>();
     objectids_from_response(await PROTOCOL.Sign_Excute(
@@ -81,25 +80,14 @@ const test_exes = async () => {
         SENDER_PRIV, ids), ids);
     console.log('progress id: ' + ids.get('progress::Progress'));
     await PROTOCOL.Sign_Excute([test_progress_run1], SENDER_PRIV, ids);
-    //await PROTOCOL.Sign_Excute([test_progress_run2], SENDER_PRIV, ids);
-    console.log(ids)
- /*    objectids_from_response(await PROTOCOL.Sign_Excute(repository_test, SENDER_PRIV, ids), ids);
-    console.log('repository id: ' + ids.get('repository::Repository'));
-    objectids_from_response(await PROTOCOL.Sign_Excute(reward_test, SENDER_PRIV, ids), ids);
-    console.log('reward id: ' + ids.get('reward::Reward'));
-
-    objectids_from_response(await PROTOCOL.Sign_Excute(demand_test, SENDER_PRIV, ids), ids);
-    console.log('demand id: ' + ids.get('demand::Demand'));
-    objectids_from_response(await PROTOCOL.Sign_Excute(machine_test, SENDER_PRIV, ids), ids);
-    console.log('machine id: ' + ids.get('machine::Machine'));
-    objectids_from_response(await PROTOCOL.Sign_Excute(service_test, SENDER_PRIV, ids), ids);
+    objectids_from_response(await PROTOCOL.Sign_Excute(
+        [test_service_launch], SENDER_PRIV, ids), ids);
     console.log('service id: ' + ids.get('service::Service'));
-    console.log('discount id: ' + ids.get('order::Discount'));
-    objectids_from_response(await PROTOCOL.Sign_Excute(service_test_order, SENDER_PRIV, ids), ids) ;
-    console.log('order id: ' + ids.get('order::Order'));
-    console.log('progress id: ' + ids.get('progress::Progress')); 
-    let resp1 = await PROTOCOL.Sign_Excute(progress_test, SENDER_PRIV, ids);
-    console.log(resp1);*/
+    objectids_from_response(await PROTOCOL.Sign_Excute(
+        [test_service_order], SENDER_PRIV, ids), ids);
+    objectids_from_response(await PROTOCOL.Sign_Excute(
+        [test_service_withdraw], SENDER_PRIV, ids), ids);
+    console.log(ids)
 }
 
 main().catch(console.error)
