@@ -28,9 +28,6 @@ const test_guard_queries = async () => {
     objectids_from_response(await PROTOCOL.Sign_Excute([test_guard_launch_creator_equal], TEST_PRIV(), ids), ids);
     console.log('guard id:  ' + ids.get('guard::Guard'))
     await sleep(10000) // wait query effective, important!
-    /*
-    let res = await test_guard_graphql_senses_objects(['0x6a0d6565423397f4d3c637eab0be37cdb06a2bd48759c2c34d6d2de816a0609b',
-    '0xed39c9cfa814dad982c82cdfe646425bdb69b009e4d81fcc660120e8933fcd81']); */
     let res = await test_guard_graphql_senses_objects(ids.get('guard::Guard') as string[]); 
     console.log(res)
 }
