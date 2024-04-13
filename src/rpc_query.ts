@@ -1,6 +1,6 @@
 import { PROTOCOL, Data_Type, Query_Param, ENTRYPOINT} from 'wowok/src/protocol';
 import { rpc_sense_objects_fn, rpc_description_fn } from 'wowok/src/guard';
-import { objectids_from_response, stringToUint8Array } from 'wowok/src/util'
+import { objectids_from_response, stringToUint8Array } from 'wowok/src/utils'
 import { bcs } from '@mysten/sui.js/bcs'
 import { TEST_PRIV } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission-test'

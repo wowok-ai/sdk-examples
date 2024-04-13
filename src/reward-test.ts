@@ -27,6 +27,7 @@ export const test_reward_claim = async (txb:TransactionBlock, param:any) => {
     let passport = verify(txb, [param.get('guard::Guard')[0] as string], objects); // use guard0 for passport
     if (!passport) {
         console.log('passport error')
+        return
     }
     allow_repeat_claim(SUI_TYPE, txb, w, permission_id, true);
     claim(SUI_TYPE, txb, w, passport as PassportObject);

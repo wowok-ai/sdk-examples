@@ -5,7 +5,7 @@ import { MachineObject, PermissionObject,  GuardObject, RepositoryObject, ValueT
 import { launch, repository, Repository_Policy_Data, Repository_Policy_Mode, add_data, Repository_Policy, repository_add_policies,
     repository_set_description, repository_remove_policies, remove,
     repository_set_policy_mode} from 'wowok/src/repository';
-import { stringToUint8Array, numToUint8Array } from 'wowok/src/util'
+import { stringToUint8Array, numToUint8Array } from 'wowok/src/utils'
 import { bcs, BCS, toHEX, fromHEX, getSuiMoveConfig } from '@mysten/bcs';
 
 export const test_repository_launch = async (txb:TransactionBlock, param:any) => {

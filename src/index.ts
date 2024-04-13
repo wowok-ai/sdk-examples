@@ -1,6 +1,6 @@
 
 import { PROTOCOL, ENTRYPOINT} from 'wowok/src/protocol';
-import { objectids_from_response, stringToUint8Array } from 'wowok/src/util'
+import { objectids_from_response, stringToUint8Array } from 'wowok/src/utils'
 import { TEST_PRIV } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission-test'
 import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_signer, test_guard_launch_substring,
@@ -57,8 +57,8 @@ const test_exes = async () => {
     console.log('progress id: ' + ids.get('progress::Progress'));
     await PROTOCOL.Sign_Excute([test_progress_run1], TEST_PRIV(), ids);
     objectids_from_response(await PROTOCOL.Sign_Excute(
-        [test_service_launch, test_service_launch], TEST_PRIV(), ids), ids);
-    console.log('service id: ' + ids.get('service::Service'));
+        [test_service_launch, test_demand_launch], TEST_PRIV(), ids), ids);
+    console.log('service id: ' + ids.get('service::Service'))
     objectids_from_response(await PROTOCOL.Sign_Excute(
         [test_service_order], TEST_PRIV(), ids), ids);
     objectids_from_response(await PROTOCOL.Sign_Excute(
@@ -69,8 +69,8 @@ const test_exes = async () => {
     console.log('demand id: ' + ids.get('demand::Demand'));
     objectids_from_response(await PROTOCOL.Sign_Excute(
         [test_reward_claim], TEST_PRIV(), ids), ids);
-    objectids_from_response(await PROTOCOL.Sign_Excute(
-        [test_demand_yes], TEST_PRIV(), ids), ids);
+/*    objectids_from_response(await PROTOCOL.Sign_Excute(
+        [test_demand_yes], TEST_PRIV(), ids), ids);*/
     console.log(ids)
 }
 

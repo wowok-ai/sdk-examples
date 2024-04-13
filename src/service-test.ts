@@ -24,10 +24,12 @@ const service_sales2:Service_Sale = {
 }
 const service_buy1: Service_Buy = {
     item: service_sales1.item,
+    max_price: 3,
     count: 200,
 }
 const service_buy2: Service_Buy = {
     item: service_sales2.item,
+    max_price: 13,
     count: 1,
 }
 const discount1 : DicountDispatch = {
@@ -57,13 +59,12 @@ export const test_service_launch = async(txb:TransactionBlock, param:any) => {
     let permission = txb.object(param.get('permission::Permission')[0] as string) as PermissionObject;
     let machine = txb.object(param.get('machine::Machine')[0] as string) as MachineObject;
     let s = service(SERVICE_PAY_TYPE, txb, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') as ServiceObject;
-
     service_set_machine(SERVICE_PAY_TYPE, txb, s, permission, machine);
     service_add_sale(SERVICE_PAY_TYPE, txb, s, permission, [service_sales1, service_sales2]);
     service_add_stock(SERVICE_PAY_TYPE, txb, s, permission, service_sales1.item, 1000);
-    service_set_price(SERVICE_PAY_TYPE, txb, s, permission, service_sales2.item, 888);
+    service_set_price(SERVICE_PAY_TYPE, txb, s, permission, service_sales2.item, 8);
     service_discount_transfer(SERVICE_PAY_TYPE, txb, s, permission, [discount1, discount2]);
-    service_publish(SERVICE_PAY_TYPE, txb, s, permission);
+    service_publish(SERVICE_PAY_TYPE, txb, s, permission); 
     service_launch(SERVICE_PAY_TYPE, txb, s);
 }
 

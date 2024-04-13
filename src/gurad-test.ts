@@ -6,15 +6,15 @@ import { OperatorType, ContextType, DemandObject, RewardObject,
     ServiceObject, DiscountObject, OrderObject, ValueType,RepositoryObject, MODULES
  } from 'wowok/src/protocol';
 import { graphql_object, graphql_objects } from './graphql_query';
-import { array_unique } from 'wowok/src/util';
+import { array_unique } from 'wowok/src/utils';
 
 export const test_guard_launch_creator_equal = async(txb:TransactionBlock, param:any) => {
     let permission_id1 = param.get('permission::Permission')[0];
     let permission_id2 = param.get('permission::Permission')[1];
 
     let maker = new SenseMaker();
-    maker.add_query(permission_id1, MODULES.permission, 'builder'); // permission1 builder
-    maker.add_query(permission_id2, MODULES.permission, 'builder'); // permission2 builder
+    maker.add_query(OperatorType.TYPE_DYNAMIC_QUERY, permission_id1, MODULES.permission, 'builder'); // permission1 builder
+    maker.add_query(OperatorType.TYPE_DYNAMIC_QUERY, permission_id2, MODULES.permission, 'builder'); // permission2 builder
     maker.add_logic(OperatorType.TYPE_LOGIC_OPERATOR_EQUAL); // equal
 
     const sense1 = maker.make() as Guard_Sense;
@@ -49,7 +49,7 @@ export const test_guard_launch_substring = async(txb:TransactionBlock, param:any
 export const test_guard_launch_number = async(txb:TransactionBlock, param:any) => {
     let permission_id1 = param.get('permission::Permission')[0];
     let maker = new SenseMaker();
-    maker.add_query(permission_id1, MODULES.permission, 'entity_count'); // entity address count
+    maker.add_query(OperatorType.TYPE_DYNAMIC_QUERY, permission_id1, MODULES.permission, 'entity_count'); // entity address count
     maker.add_param(ValueType.TYPE_STATIC_u64, 2); 
     maker.add_logic(OperatorType.TYPE_LOGIC_OPERATOR_U128_GREATER); // less than 2
     const sense1 = maker.make() as Guard_Sense;
@@ -64,7 +64,7 @@ export const test_guard_launch_permission_builder = async(txb:TransactionBlock, 
     let permission_id = param.get('permission::Permission')[0];
 
     let maker = new SenseMaker();
-    maker.add_query(permission_id, MODULES.permission, 'builder'); // permission builder address
+    maker.add_query(OperatorType.TYPE_DYNAMIC_QUERY, permission_id, MODULES.permission, 'builder'); // permission builder address
     maker.add_param(ContextType.TYPE_CONTEXT_SIGNER); // signer
     maker.add_logic(OperatorType.TYPE_LOGIC_OPERATOR_EQUAL);
     const sense1 = maker.make(false, Guard_Sense_Binder.AND) as Guard_Sense;
