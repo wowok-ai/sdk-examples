@@ -56,8 +56,12 @@ const discount2 : DicountDispatch = {
 }
 
 export const test_service_launch = async(txb:TransactionBlock, param:any) => {
-    let permission = txb.object(param.get('permission::Permission')[0] as string) as PermissionObject;
-    let machine = txb.object(param.get('machine::Machine')[0] as string) as MachineObject;
+    let permission = param.get('permission::Permission')[0] ;
+    let machine = param.get('machine::Machine')[0] ;
+    if (!permission || !machine) {
+        console.log('test_service_launch param error')
+        return ;
+    }
     let s = service(SERVICE_PAY_TYPE, txb, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') as ServiceObject;
     service_set_machine(SERVICE_PAY_TYPE, txb, s, permission, machine);
     service_add_sale(SERVICE_PAY_TYPE, txb, s, permission, [service_sales1, service_sales2]);

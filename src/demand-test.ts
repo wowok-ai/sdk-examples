@@ -14,6 +14,12 @@ export const test_demand_yes = async (txb:TransactionBlock, param:any) => {
     let perm = param.get('permission::Permission')[0];
     let service1 = param.get('service::Service')[0];
     let service2 = param.get('service::Service')[1];
+    if (!service1 || !service2 || !perm) {
+        console.log("test_demand_yes param error");
+        console.log(service1); console.log(service2); console.log(perm)
+        return
+    }
+
     let d = param.get('demand::Demand')[0];
 
     present(SUI_TYPE, SERVICE_PAY_TYPE, txb, d, service1, 'hello, service here');

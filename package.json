@@ -22,8 +22,7 @@
     "@mysten/bcs": "^0.11.1",
     "@mysten/sui.js": "^0.50.1",
     "graphql": "^16.8.1",
-    "graphql-tag": "^2.12.6",
-    "wowok": "^1.0.7"
+    "graphql-tag": "^2.12.6"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",

@@ -3,7 +3,7 @@ import { MachineObject, PermissionObject, GuardObject, RepositoryObject, ValueTy
 import { TEST_ADDR } from './common'
 import { launch, machine, Machine_Node, INITIAL_NODE_NAME, MachineNodeObject, machine_add_node, machine_remove_node,
     machine_add_repository, machine_remove_repository, machine_clone, machine_publish, machine_set_endpoint, machine_pause,
-    namedOperator_ORDER_PAYER, change_permission, machine_set_description} from 'wowok/src/machine';
+    OPERATOR_ORDER_PAYER, change_permission, machine_set_description} from 'wowok/src/machine';
 import { progress, hold, next, launch as progress_launch, progress_set_namedOperator} from 'wowok/src/progress'
 import { signer_guard } from 'wowok/src/guard';
 import { verify, } from 'wowok/src/passport';
@@ -39,7 +39,7 @@ export const node_order_signed:Machine_Node = {
     description: 'node3',
     pairs: [
         {prior_node: node_order_delivered.name, threshold:0, forwards:[
-            {name:'payer signed', namedOperator: namedOperator_ORDER_PAYER},
+            {name:'payer signed', namedOperator: OPERATOR_ORDER_PAYER},
         ]},
     ]
 }
@@ -48,15 +48,15 @@ export const node_order_canceled:Machine_Node = {
     description: 'node4',
     pairs: [
         {prior_node: INITIAL_NODE_NAME, threshold:0, forwards:[
-            {name:'payed canceled',  namedOperator: namedOperator_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: OPERATOR_ORDER_PAYER},
             {name:'service canceled',  permission: 10000},
         ]},
         {prior_node: node_order_delivered.name, forwards:[
-            {name:'payed canceled',  namedOperator: namedOperator_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: OPERATOR_ORDER_PAYER},
             {name:'express canceled', namedOperator:'EXPRESS'}
         ]},
         {prior_node: node_order_signed.name, forwards:[
-            {name:'payed canceled',  namedOperator: namedOperator_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: OPERATOR_ORDER_PAYER},
             {name:'service canceled', permission: 10001}
         ]},
     ]
@@ -69,7 +69,9 @@ export const test_machine_launch = async (txb:TransactionBlock, param:any) => {
 
     let m = machine(txb, permission, 'mmmm....', 'https://best-service.com/') as MachineObject;
 
-    machine_add_node(txb, m, permission, [node_order_comfirmed, node_order_delivered, node_order_signed, node_order_canceled]);
+    if (!machine_add_node(txb, m, permission, [node_order_comfirmed, node_order_delivered, node_order_signed, node_order_canceled])){
+        console.log('test_machine_launch machine_add_node error');
+    }
     machine_set_endpoint(txb, m, permission);
     machine_set_endpoint(txb, m, permission, 'https://best-service.com/order-ops/');
     machine_publish(txb, m, permission);
@@ -99,15 +101,15 @@ export const node_order_canceled2:Machine_Node = {
     description: 'node6',
     pairs: [
         {prior_node: INITIAL_NODE_NAME, threshold:0, forwards:[
-            {name:'payed canceled',  namedOperator: namedOperator_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: OPERATOR_ORDER_PAYER},
             {name:'service canceled',  permission: 10000},
         ]},
         {prior_node: node_order_delivered.name, forwards:[
-            {name:'payed canceled',  namedOperator: namedOperator_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: OPERATOR_ORDER_PAYER},
             {name:'express canceled', namedOperator:'EXPRESS'}
         ]},
         {prior_node: node_order_signed.name, forwards:[
-            {name:'payed canceled',  namedOperator: namedOperator_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: OPERATOR_ORDER_PAYER},
             {name:'service canceled', permission: 10001}
         ]},
     ]
@@ -139,10 +141,14 @@ export const test_machine_progress = async (txb:TransactionBlock, param:any) => 
 
 // machine could generate progresses while PUBLISHED
 export const test_progress_run1 = async (txb:TransactionBlock, param:any) => {
-    let permission = param.get('permission::Permission')[0] as string; // permission 0
-    let machine = param.get('machine::Machine')[0] as string;
-    let progress = param.get('progress::Progress')[0] as string;
-    progress_set_namedOperator(txb, machine, permission, progress, namedOperator_ORDER_PAYER, [TEST_ADDR()]);
+    let permission = param.get('permission::Permission')[0]; // permission 0
+    let machine = param.get('machine::Machine')[0];
+    let progress = param.get('progress::Progress')[0];
+    if (!permission || !machine || !progress) {
+        console.log('test_progress_run1 param error');
+        return 
+    }
+    progress_set_namedOperator(txb, machine, permission, progress, OPERATOR_ORDER_PAYER, [TEST_ADDR()]);
     hold(txb, machine, permission, progress, {next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
     hold(txb, machine, permission, progress, {next_node_name:node_order_comfirmed.name, forward:'confirm order'}, false);
     hold(txb, machine, permission, progress, {next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
