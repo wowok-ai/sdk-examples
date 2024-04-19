@@ -65,7 +65,7 @@ export const node_order_canceled:Machine_Node = {
 export const test_machine_launch = async (txb:TransactionBlock, param:any) => {
     let permission = param.get('permission::Permission')[0] as string;
     let permission_new = param.get('permission::Permission')[1] as string;    
-    let repo = param.get('repository::Repository')[0] as string;
+    let repo = param.get('repository::Repository')? param.get('repository::Repository')[0] : undefined;
 
     let m = machine(txb, permission, 'mmmm....', 'https://best-service.com/') as MachineObject;
 
@@ -75,7 +75,10 @@ export const test_machine_launch = async (txb:TransactionBlock, param:any) => {
     machine_set_endpoint(txb, m, permission);
     machine_set_endpoint(txb, m, permission, 'https://best-service.com/order-ops/');
     machine_publish(txb, m, permission);
-    machine_add_repository(txb, m, permission, repo);
+    if (repo) {
+        machine_add_repository(txb, m, permission, repo);
+    }
+
     machine_pause(txb, m, permission, true);
     launch(txb, m);
 }

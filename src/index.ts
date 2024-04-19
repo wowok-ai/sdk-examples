@@ -5,7 +5,7 @@ import { TEST_PRIV } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission-test'
 import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_signer, test_guard_launch_substring,
     test_guard_launch_number, test_guard_graphql_senses_objects, test_guard_launch_creator_equal, test_context_launch_creator_equal, 
-    test_guard_passport } from './gurad-test'
+    test_guard_passport, test_guard_future_object } from './gurad-test'
 import { test_repository_launch, test_repository_policy } from './repository-test'
 import { test_machine_edit_nodes, test_machine_launch, test_machine_progress, test_progress_run1, test_progress_run2 } from './machine-test';
 import { test_service_launch, test_service_order, test_service_withdraw } from './service-test';
@@ -15,24 +15,33 @@ import { verify } from 'wowok/src/passport';
 
 const main = async () => {
     PROTOCOL.UseNetwork(ENTRYPOINT.testnet);
-    await test_exes();
+    // await test_exes();
     // await test_guard_queries()
     // await test_new_guard()
+    await test_future_objects()
 }   
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const test_new_guard = async () => {
+const test_future_objects = async () => {
     let ids = new Map<string, string[]>();
     objectids_from_response(await PROTOCOL.Sign_Excute([test_permission_launch, test_permission_launch], TEST_PRIV(), ids), ids);
     console.log('permission id: ' + ids.get('permission::Permission'));
     // object random sequence by rpc-get-objects !!  
     objectids_from_response(await PROTOCOL.Sign_Excute(
-        [test_guard_launch_creator_equal], 
-        TEST_PRIV(), ids), ids);
+        [test_machine_launch], TEST_PRIV(), ids), ids);
+    console.log('machine id: ' + ids.get('machine::Machine'));
+    objectids_from_response(await PROTOCOL.Sign_Excute(
+        [test_machine_progress], TEST_PRIV(), ids), ids);
+    console.log('progress id: ' + ids.get('progress::Progress'));
+    objectids_from_response(await PROTOCOL.Sign_Excute(
+        [test_guard_future_object], TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));
+    objectids_from_response(await PROTOCOL.Sign_Excute(
+        [test_guard_passport], TEST_PRIV(), ids), ids);
+    console.log(ids);
 }
 
 const test_guard_queries = async () => {
@@ -55,10 +64,10 @@ const test_exes = async () => {
         [test_context_launch_creator_equal], 
         TEST_PRIV(), ids), ids);
     objectids_from_response(await PROTOCOL.Sign_Excute(
-        [test_guard_launch_creator_equal, test_guard_launch_everyone, test_guard_launch_signer, test_guard_launch_substring], 
+        [test_guard_launch_creator_equal], 
         TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));
- /*    objectids_from_response(await PROTOCOL.Sign_Excute(
+    objectids_from_response(await PROTOCOL.Sign_Excute(
         [test_permission_set_guard, test_guard_launch_number, test_guard_launch_permission_builder, test_repository_launch], 
         TEST_PRIV(), ids), ids);
     objectids_from_response(await PROTOCOL.Sign_Excute(
@@ -79,9 +88,9 @@ const test_exes = async () => {
         [test_service_withdraw, test_demand_launch], TEST_PRIV(), ids), ids);  
     console.log('demand id: ' + ids.get('demand::Demand'));
     objectids_from_response(await PROTOCOL.Sign_Excute(
-        [test_demand_yes], TEST_PRIV(), ids), ids);*/
+        [test_demand_yes], TEST_PRIV(), ids), ids);
     objectids_from_response(await PROTOCOL.Sign_Excute(
-        [test_reward_launch], TEST_PRIV(), ids), ids);
+        [test_reward_launch], TEST_PRIV(), ids), ids); 
     console.log('reward id: ' + ids.get('reward::Reward'));
     objectids_from_response(await PROTOCOL.Sign_Excute(
         [test_reward_claim], TEST_PRIV(), ids), ids);

@@ -2,7 +2,7 @@ import { TransactionBlock } from '@mysten/sui.js/transactions';
 import { SUI_TYPE, RewardObject, PassportObject} from 'wowok/src/protocol';
 import { launch, reward, deposit, claim, reward_set_description, reward_add_guard, RewardGuardPortions, 
     reward_lock_guards, reward_expand_time, allow_repeat_claim } from 'wowok/src/reward';
-import { verify, guard_queries, destroy, GuardQueryType} from 'wowok/src/passport'
+import { verify, guard_queries, destroy } from 'wowok/src/passport'
 
 export const test_reward_launch = async (txb:TransactionBlock, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
@@ -26,10 +26,9 @@ export const test_reward_claim = async (txb:TransactionBlock, param:any) => {
     reward_lock_guards(SUI_TYPE, txb, w, permission_id)
     allow_repeat_claim(SUI_TYPE, txb, w, permission_id, true);
 
-    let q:GuardQueryType = {guardid:guard1}
-    let objects = await guard_queries([q]);
+    let objects = await guard_queries([guard2]);
     console.log(objects)
-    let passport = verify(txb, [guard1], objects); // use guard0 for passport
+    let passport = verify(txb, [guard2], objects); // use guard0 for passport
     if (!passport) {
         console.log('passport error')
         return
