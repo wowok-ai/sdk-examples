@@ -2,6 +2,8 @@
   "name": "sdk-test",
   "version": "1.0.1",
   "description": "AI-oriented web3 collaboration protocol, driving innovaion and making it more likely to happen.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "module": "node",
   "type": "module",
   "scripts": {
@@ -13,7 +15,8 @@
     "web3",
     "AI",
     "wowok",
-    "sui"
+    "sui",
+    "examples"
   ],
   "author": "wowok",
   "license": "ISC",
@@ -21,6 +24,7 @@
     "@apollo/client": "^3.9.10",
     "@mysten/bcs": "^0.11.1",
     "@mysten/sui.js": "^0.51.2",
+    "esm": "^3.2.25",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6"
   },

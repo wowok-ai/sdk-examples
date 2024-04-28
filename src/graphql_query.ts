@@ -1,8 +1,7 @@
 import { ApolloClient } from "@apollo/client/core";
 import { ApolloCache, InMemoryCache } from "@apollo/client/cache";
-import { PROTOCOL } from "wowok/src/protocol";
 import { GRAPHQL_OBJECTS, GRAPHQL_OBJECTS_TYPE, GRAPHQL_OBJECT, GRAPHQL_OWNER} from 'wowok/src/graphql'
-import { MAX_GUARD_COUNT } from "wowok/src/passport";
+import { Passport } from "wowok";
 
 export const client = new ApolloClient({
   uri: "https://sui-testnet.mystenlabs.com/graphql",
@@ -18,7 +17,7 @@ export const graphql_object = async (objectid: string): Promise<any> => {
   });
 };
 export const graphql_objects = async (objectids: string[]): Promise<any | boolean> => {
-  if (objectids.length == 0 || objectids.length > MAX_GUARD_COUNT) return false;
+  if (objectids.length == 0 || objectids.length > Passport.MAX_GUARD_COUNT) return false;
 
   return client.query({
       query: GRAPHQL_OBJECTS,

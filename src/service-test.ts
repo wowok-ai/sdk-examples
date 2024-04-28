@@ -1,17 +1,11 @@
  //@ts-ignore 
-import { TransactionBlock } from '@mysten/sui.js/transactions';
-import { service, service_add_sale, service_publish, service_pause, launch as service_launch, DicountDispatch,
-    service_discount_transfer, Service_Discount_Type, Service_Buy, Service_Sale,
-    service_set_price, service_set_machine, service_add_stock, buy,
-    service_withdraw} from 'wowok/src/service';
-import { MachineObject, PermissionObject, ProgressObject, OperatorType, ContextType, DemandObject, RewardObject,
-    ServiceObject, DiscountObject, OrderObject, ValueType,RepositoryObject, 
- } from 'wowok/src/protocol';
-
+import { Protocol, Service_Discount_Type, Service_Buy, Service_Sale, Service, MachineObject, PermissionObject,
+    DicountDispatch, TxbObject} from 'wowok';
 import { TEST_ADDR } from './common'
 
 
-export const SERVICE_PAY_TYPE = '0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI'
+export const SERVICE_PAY_TYPE = Protocol.SUI_TOKEN_TYPE;
+
 const service_sales1:Service_Sale = {
     item:'cup A',
     price: 3,
@@ -55,39 +49,42 @@ const discount2 : DicountDispatch = {
     }
 }
 
-export const test_service_launch = async(txb:TransactionBlock, param:any) => {
+export const test_service_launch = async(protocol:Protocol, param:any) => {
     let permission = param.get('permission::Permission')[0] ;
     let machine = param.get('machine::Machine')[0] ;
     if (!permission || !machine) {
         console.log('test_service_launch param error')
         return ;
     }
-    let s = service(SERVICE_PAY_TYPE, txb, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') as ServiceObject;
-    service_set_machine(SERVICE_PAY_TYPE, txb, s, permission, machine);
-    service_add_sale(SERVICE_PAY_TYPE, txb, s, permission, [service_sales1, service_sales2]);
-    service_add_stock(SERVICE_PAY_TYPE, txb, s, permission, service_sales1.item, 1000);
-    service_set_price(SERVICE_PAY_TYPE, txb, s, permission, service_sales2.item, 8);
-    service_discount_transfer(SERVICE_PAY_TYPE, txb, s, permission, [discount1, discount2]);
-    service_publish(SERVICE_PAY_TYPE, txb, s, permission); 
-    service_launch(SERVICE_PAY_TYPE, txb, s);
+    let service = Service.New(protocol, SERVICE_PAY_TYPE, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') ;
+    service.set_machine(machine);
+    service.add_sale([service_sales1, service_sales2]);
+    service.add_stock(service_sales1.item, 10000); // increase stock
+    service.set_price(service_sales2.item, 8); // reduce price
+    service.discount_transfer([discount1, discount2]);
+    service.publish(); 
+    service.launch();
 }
 
-export const test_service_order = async(txb:TransactionBlock, param:any) => {
-    let permission = txb.object(param.get('permission::Permission')[0] as string) as PermissionObject;
-    let machine = txb.object(param.get('machine::Machine')[0] as string) as MachineObject;
-    let s = txb.object(param.get('service::Service')[0] as string) as ServiceObject;
+export const test_service_order = async(protocol:Protocol, param:any) => {
+    let permission = param.get('permission::Permission')[0] 
+    let machine = param.get('machine::Machine')[0] ;
+    let s = param.get('service::Service')[0];
 
-    buy(SERVICE_PAY_TYPE, txb, s, [service_buy1, service_buy2], txb.splitCoins(txb.gas, [txb.pure(100000)]), param.get('order::Discount')[0] as string, machine);
-    buy(SERVICE_PAY_TYPE, txb, s, [service_buy1], txb.splitCoins(txb.gas, [txb.pure(10000)]), param.get('order::Discount')[1] as  string, machine);
-    buy(SERVICE_PAY_TYPE, txb, s, [service_buy2], txb.splitCoins(txb.gas, [txb.pure(100000)]), param.get('order::Discount')[2] as string, machine);
+    let service = Service.From(protocol, SERVICE_PAY_TYPE, permission, s);
+    let txb = protocol.CurrentSession();
+    //service.buy([service_buy1, service_buy2], txb.splitCoins(txb.gas, [txb.pure(100000)]), param.get('order::Discount')[0] as string, machine);
+    service.buy([service_buy1], txb.splitCoins(txb.gas, [txb.pure(10000)]), param.get('order::Discount')[1], machine);
+    //service.buy([service_buy2], txb.splitCoins(txb.gas, [txb.pure(100000)]), param.get('order::Discount')[2] as string, machine);
 }
 
-export const test_service_withdraw = async(txb:TransactionBlock, param:any) => {
-    let permission = param.get('permission::Permission')[0] as string;
-    let s = param.get('service::Service')[0] as string;
-    let orders = param.get('order::Order') as string[];
-    
+export const test_service_withdraw = async(protocol:Protocol, param:any) => {
+    let permission = param.get('permission::Permission')[0] ;
+    let s = param.get('service::Service')[0] ;
+    let orders = param.get('order::Order') as TxbObject[];
+    let service = Service.From(protocol, SERVICE_PAY_TYPE, permission, s);
+
     orders.forEach((o) => {
-        service_withdraw(SERVICE_PAY_TYPE, txb, s, permission, o);
+        service.withdraw(o);
     })
 }
