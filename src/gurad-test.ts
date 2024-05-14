@@ -90,6 +90,9 @@ export const test_guard_passport = async(protocol:Protocol, param:any) => {
         console.log('test_guard_passport guard undefined')
         return 
     }
+    // MUST declare guard1 & guard2 above queries! SUI BUG.
+    let guard1 = protocol.CurrentSession().object(g1) as GuardObject;
+    let guard2 = protocol.CurrentSession().object(g2) as GuardObject;
 
     let parser = await GuardParser.CreateAsync(protocol, [g1, g2]);
     parser.guardlist().forEach(g => {
@@ -103,7 +106,7 @@ export const test_guard_passport = async(protocol:Protocol, param:any) => {
 
     let query = await parser.done();
     protocol.CurrentSession().setGasBudget(500000000); // must increase gas budget: 1 SUI
-    let passport = new Passport(protocol, [g1, g2], query)
+    let passport = new Passport(protocol, [guard1, guard2], query)
     passport.freeze()
 }
 
