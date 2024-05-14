@@ -4,7 +4,8 @@ export const test_reward_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
     let reward = Reward.New(protocol, Protocol.SUI_COIN_TYPE, permission_id, 'reward hhh', 10000);
     let txb = protocol.CurrentSession();
-    reward.deposit([txb.splitCoins(txb.gas, [111]), txb.splitCoins(txb.gas, [222]), txb.splitCoins(txb.gas, [333])]);
+    reward.deposit([txb.splitCoins(txb.gas, [111]), txb.splitCoins(txb.gas, [222]), 
+        txb.splitCoins(txb.gas, [333]),  txb.splitCoins(txb.gas, [444]),]);
     reward.set_description('reward reward reward!');
     reward.launch();
 }
@@ -24,9 +25,15 @@ export const test_reward_claim = async (protocol:Protocol, param:any) => {
     reward.lock_guards()
     reward.allow_repeat_claim(true);
 
-    let objects = await GuardParser.guard_queries(protocol, [guard2]);
+    let parser = await GuardParser.CreateAsync(protocol, [guard2]);
+    parser.guardlist().forEach(e => {
+        console.log(e.futrue_list)
+        console.log(e.query_list)
+    });
 
-    let passport = new Passport(protocol, [guard2], objects); // use guard0 for passport
+    let query = await parser.done();
+
+    let passport = new Passport(protocol, [guard2], query); // use guard0 for passport
     reward.claim(passport.get_object());
     passport.freeze() // destory or freeze passport while used
 }

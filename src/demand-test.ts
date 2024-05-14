@@ -7,6 +7,11 @@ export const test_demand_launch = async (protocol:Protocol, param:any) => {
     let d = Demand.New(protocol, Protocol.SUI_COIN_TYPE, permission_id, 'demand TEST', 
         txb.splitCoins(txb.gas, [10000000]));
     d.deposit(txb.splitCoins(txb.gas,[200000]));
+    d.deposit(txb.splitCoins(txb.gas,[200000]));
+    d.deposit(txb.splitCoins(txb.gas,[200000]));
+    d.deposit(txb.splitCoins(txb.gas,[200000]));
+    d.deposit(txb.splitCoins(txb.gas,[200000]));
+    d.expand_time(20000);
     d.launch();
 }
 

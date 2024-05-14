@@ -1,5 +1,5 @@
 
-import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser} from 'wowok';
+import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Passport} from 'wowok';
 import { TEST_PRIV, TEST_ADDR } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission-test'
 import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_signer, test_guard_launch_substring,
@@ -12,10 +12,10 @@ import { test_reward_claim, test_reward_launch } from './reward-test';
 import { test_demand_launch, test_demand_yes } from './demand-test';
 
 const main = async () => {
-    let protocol = new Protocol(ENTRYPOINT.testnet, TEST_ADDR())
-    await test_exes(protocol);
-    // await test_future_objects(protocol)
-}   
+    let protocol = new Protocol(ENTRYPOINT.testnet)
+    // await test_exes(protocol);
+    await test_future_objects(protocol)
+}  
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -64,7 +64,10 @@ const test_exes = async (protocol:Protocol) => {
         TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_permission_set_guard, test_guard_launch_number, test_guard_launch_permission_builder, test_repository_launch], 
+        [test_permission_set_guard, test_guard_launch_number, test_guard_launch_permission_builder], 
+        TEST_PRIV(), ids), ids);    
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+        [test_repository_launch], 
         TEST_PRIV(), ids), ids);
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_repository_policy, test_machine_launch], 

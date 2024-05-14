@@ -62,5 +62,6 @@ export const test_repository_policy = async (protocol:Protocol, param:any) => {
     r.add_policies([po1, po2]); // 'order number' 'order time'
     r.remove_policies(['p2', 'p1']);
     r.set_policy_mode(Repository_Policy_Mode.POLICY_MODE_STRICT); // strict mode
+    r.add_reference([permission_id, permission_id, repo_id]);
     r.add_data(data_order_number);
 }
