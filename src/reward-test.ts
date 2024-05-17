@@ -26,14 +26,9 @@ export const test_reward_claim = async (protocol:Protocol, param:any) => {
     reward.allow_repeat_claim(true);
 
     let parser = await GuardParser.CreateAsync(protocol, [guard2]);
-    parser.guardlist().forEach(e => {
-        console.log(e.futrue_list)
-        console.log(e.query_list)
-    });
-
     let query = await parser.done();
 
-    let passport = new Passport(protocol, [guard2], query); // use guard0 for passport
+    let passport = new Passport(protocol, query); // use guard0 for passport
     reward.claim(passport.get_object());
     passport.freeze() // destory or freeze passport while used
 }
