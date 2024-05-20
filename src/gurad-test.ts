@@ -58,6 +58,14 @@ export const test_guard_future_object = async(protocol:Protocol, param:any) => {
         maker.combine(maker2, false)) // BE TRUE: sense(FALSE) or sense2(TRUE)
 }
 
+export const test_guard_to_object = async (protocol:Protocol, param:any) =>  {
+    let g1 = param.get('guard::Guard')?  param.get('guard::Guard')[0] : undefined;
+    let g2 = param.get('guard::Guard')?  param.get('guard::Guard')[1] : undefined;
+
+    if (g1) console.log(JSON.stringify(await GuardParser.DeGuardObject(protocol, g1), null , 2));
+    if (g2) console.log(JSON.stringify(await GuardParser.DeGuardObject(protocol, g2), null , 2));
+}
+
 export const test_guard_passport = async(protocol:Protocol, param:any) => {
     let g1 = param.get('guard::Guard')?  param.get('guard::Guard')[0] : undefined;
     let g2 = param.get('guard::Guard')?  param.get('guard::Guard')[1] : undefined;
