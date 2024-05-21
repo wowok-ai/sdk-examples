@@ -13,10 +13,9 @@ import { test_demand_launch, test_demand_yes } from './demand-test';
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
-    // await test_exes(protocol);
+    await test_exes(protocol);
     await test_future_objects(protocol)
 }  
-
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));

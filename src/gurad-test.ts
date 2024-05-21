@@ -62,8 +62,16 @@ export const test_guard_to_object = async (protocol:Protocol, param:any) =>  {
     let g1 = param.get('guard::Guard')?  param.get('guard::Guard')[0] : undefined;
     let g2 = param.get('guard::Guard')?  param.get('guard::Guard')[1] : undefined;
 
-    if (g1) console.log(JSON.stringify(await GuardParser.DeGuardObject(protocol, g1), null , 2));
-    if (g2) console.log(JSON.stringify(await GuardParser.DeGuardObject(protocol, g2), null , 2));
+    if (g1) {
+        let r = await GuardParser.DeGuardObject(protocol, g1);
+        console.log(JSON.stringify(r.object, null , 2));
+        console.log(r.variable);
+    }
+    if (g2) {
+        let r = await GuardParser.DeGuardObject(protocol, g2);
+        console.log(JSON.stringify(r.object, null , 2));
+        console.log(r.variable);
+    }
 }
 
 export const test_guard_passport = async(protocol:Protocol, param:any) => {
@@ -75,9 +83,6 @@ export const test_guard_passport = async(protocol:Protocol, param:any) => {
         console.log('test_guard_passport guard undefined')
         return 
     }
-    // MUST declare guard1 & guard2 above queries! SUI BUG.
-    let guard1 = protocol.CurrentSession().object(g1) as GuardObject;
-    let guard2 = protocol.CurrentSession().object(g2) as GuardObject;
 
     let parser = await GuardParser.CreateAsync(protocol, [g1, g2]);
     parser.guardlist().forEach(g => {
