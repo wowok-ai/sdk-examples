@@ -15,7 +15,6 @@ const permission_entity_3 : Permission_Entity = {
     permissions: [{index:PermissionIndex.demand}, {index:PermissionIndex.machine}],
 }
 
-
 export const test_permission_launch = async(protocol:Protocol, param:any) => {
     let p = Permission.New(protocol, 'permission test');
 

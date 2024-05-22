@@ -1,5 +1,5 @@
 import { GuardMaker, Guard, MODULES, OperatorType, Protocol,
-    Passport, ValueType, VariableType, ContextType, GuardParser, GuardObject} from 'wowok';
+    Passport, ValueType, ConstantType, ContextType, GuardParser, GuardObject} from 'wowok';
 import { graphql_object, graphql_objects } from './graphql_query';
 
 export const test_guard_launch_creator_equal = async(protocol:Protocol, param:any) => {
@@ -41,13 +41,13 @@ export const test_guard_future_object = async(protocol:Protocol, param:any) => {
     }
 
     let maker = new GuardMaker();
-    let identifer = maker.add_variable(ContextType.TYPE_WITNESS_ID, machine);
+    let identifer = maker.add_constant(ContextType.TYPE_WITNESS_ID, machine);
     maker = maker.add_query(MODULES.progress, 'has_parent', identifer, true)
                 .build(true);// BE FALSE
 
     let maker2 = new GuardMaker();
-    identifer = maker2.add_variable(ContextType.TYPE_WITNESS_ID, machine);
-    maker2 = maker2.add_param(ContextType.TYPE_VARIABLE, identifer)
+    identifer = maker2.add_constant(ContextType.TYPE_WITNESS_ID, machine);
+    maker2 = maker2.add_param(ContextType.TYPE_CONSTANT, identifer)
             .add_query(MODULES.permission, 'builder', permission)
             .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // machine's  futrue progress-id equals permission's builder[always false]4
             .build(); // BE TRUE: !(machine object's progress id == permission object's builder)
@@ -65,12 +65,12 @@ export const test_guard_to_object = async (protocol:Protocol, param:any) =>  {
     if (g1) {
         let r = await GuardParser.DeGuardObject(protocol, g1);
         console.log(JSON.stringify(r.object, null , 2));
-        console.log(r.variable);
+        console.log(r.constant);
     }
     if (g2) {
         let r = await GuardParser.DeGuardObject(protocol, g2);
         console.log(JSON.stringify(r.object, null , 2));
-        console.log(r.variable);
+        console.log(r.constant);
     }
 }
 
@@ -93,7 +93,7 @@ export const test_guard_passport = async(protocol:Protocol, param:any) => {
                 f.future = progress;
         }}));
 
-        g.variable.forEach((f => {f.future  = progress; }))
+        g.constant.forEach((f => {f.future  = progress; }))
     });
 
     let query = await parser.done();
@@ -123,13 +123,13 @@ export const test_guard_launch_permission_builder = async(protocol:Protocol, par
     Guard.launch(protocol, 'permission builder address equals singer address', sense1);
 }
 
-export const test_variable_launch_creator_equal = async (protocol:Protocol, param:any) => {
+export const test_constant_launch_creator_equal = async (protocol:Protocol, param:any) => {
     let permission_id1 = param.get('permission::Permission')[0];
     let permission_id2 = param.get('permission::Permission')[1];
 
     let maker = new GuardMaker();
-    let id1 = maker.add_variable(ValueType.TYPE_ADDRESS, permission_id1);
-    let id2 = maker.add_variable(ValueType.TYPE_ADDRESS, permission_id2);
+    let id1 = maker.add_constant(ValueType.TYPE_ADDRESS, permission_id1);
+    let id2 = maker.add_constant(ValueType.TYPE_ADDRESS, permission_id2);
     maker.add_query(MODULES.permission, 'builder', id1); // permission1 builder
     maker.add_query(MODULES.permission, 'builder', id2); // permission2 builder
     maker.add_logic(OperatorType.TYPE_LOGIC_EQUAL); // BE TRUE: equal

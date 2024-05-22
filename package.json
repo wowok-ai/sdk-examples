@@ -26,8 +26,7 @@
     "@mysten/sui.js": "^0.51.2",
     "esm": "^3.2.25",
     "graphql": "^16.8.1",
-    "graphql-tag": "^2.12.6",
-    "wowok": "^1.1.5"
+    "graphql-tag": "^2.12.6"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",

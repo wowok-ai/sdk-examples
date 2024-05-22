@@ -1,5 +1,5 @@
 import { Demand, DemandObject, Protocol, Service} from 'wowok';
-import { SERVICE_PAY_TYPE } from './service-test'
+import { SERVICE_PAY_TYPE } from './service_test'
 
 export const test_demand_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
