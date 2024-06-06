@@ -84,7 +84,7 @@ const test_exes = async (protocol:Protocol) => {
         TEST_PRIV(), ids), ids);    
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_repository_launch], 
-        TEST_PRIV(), ids), ids);
+        TEST_PRIV(), ids), ids); 
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_repository_policy, test_machine_launch], 
         TEST_PRIV(), ids), ids);
