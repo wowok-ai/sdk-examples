@@ -14,9 +14,9 @@ import { create_my_resource, manage_my_resource, like, avatar, transfer_resource
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
-    //await test_personal(protocol, '0x58b43ad7c0c1de0b07f7c9be3aaa55b5318f1b018b4562f46057d60b01614840');
-    await test_exes(protocol);
-    await test_future_objects(protocol)
+    await test_personal(protocol, '');
+    //await test_exes(protocol);
+    //await test_future_objects(protocol)
 }  
 
 function sleep(ms: number): Promise<void> {

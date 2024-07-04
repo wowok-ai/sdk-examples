@@ -11,7 +11,7 @@ export const test_demand_launch = async (protocol:Protocol, param:any) => {
     d.deposit(txb.splitCoins(txb.gas,[200000]));
     d.deposit(txb.splitCoins(txb.gas,[200000]));
     d.deposit(txb.splitCoins(txb.gas,[200000]));
-    d.expand_time(20000);
+    d.expand_time(true, 2000000000);
     d.launch();
 }
 

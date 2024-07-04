@@ -2,11 +2,12 @@ import { Protocol, RewardObject, PassportObject, RewardGuardPortions, Reward, Pa
 
 export const test_reward_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
-    let reward = Reward.New(protocol, Protocol.SUI_COIN_TYPE, permission_id, 'reward hhh', 10000);
+    let reward = Reward.New(protocol, Protocol.SUI_COIN_TYPE, permission_id, 'reward hhh', true, 10000000000);
     let txb = protocol.CurrentSession();
     reward.deposit([txb.splitCoins(txb.gas, [111]), txb.splitCoins(txb.gas, [222]), 
         txb.splitCoins(txb.gas, [333]),  txb.splitCoins(txb.gas, [444]),]);
     reward.set_description('reward reward reward!');
+    reward.allow_claim(true);
     reward.launch();
 }
 
@@ -21,7 +22,7 @@ export const test_reward_claim = async (protocol:Protocol, param:any) => {
     let g1 : RewardGuardPortions = {guard: guard1 as string, portions:2};
     let g2 : RewardGuardPortions = {guard: guard2 as string, portions:1};
     reward.add_guard([ g1, g2 ])
-    reward.expand_time(100000)
+    reward.expand_time(true, 10000000000)
     reward.lock_guards()
     reward.allow_repeat_claim(true);
 

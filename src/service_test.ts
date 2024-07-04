@@ -56,6 +56,7 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
         console.log('test_service_launch param error')
         return ;
     }
+
     let service = Service.New(protocol, SERVICE_PAY_TYPE, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') ;
     service.set_machine(machine);
     service.add_sale([service_sales1, service_sales2]);
@@ -73,12 +74,14 @@ export const test_service_order = async(protocol:Protocol, param:any) => {
 
     let service = Service.From(protocol, SERVICE_PAY_TYPE, permission, s);
     let txb = protocol.CurrentSession();
+    txb.setGasBudget(10000000); // must be enough coin
     //service.buy([service_buy1, service_buy2], txb.splitCoins(txb.gas, [txb.pure(100000)]), param.get('order::Discount')[0] as string, machine);
-    service.buy([service_buy1], txb.splitCoins(txb.gas, [txb.pure(10000)]), param.get('order::Discount')[1], machine);
+    service.buy([service_buy1, service_buy2], txb.splitCoins(txb.gas, [txb.pure(10000)]), /*param.get('order::Discount')[1], machine */);
     //service.buy([service_buy2], txb.splitCoins(txb.gas, [txb.pure(100000)]), param.get('order::Discount')[2] as string, machine);
 }
 
 export const test_service_withdraw = async(protocol:Protocol, param:any) => {
+    console.log(param)
     let permission = param.get('permission::Permission')[0] ;
     let s = param.get('service::Service')[0] ;
     let orders = param.get('order::Order') as TxbObject[];

@@ -3,7 +3,7 @@ import { ERROR, Errors } from 'wowok/src/exception';
 
 export const create_my_resource = (protocol:Protocol) => {
     let wowok_entity =  Entity.From(protocol);
-    wowok_entity.create_resource('i am Jack Chou.');
+    wowok_entity.create_resource();
 }
 
 export const manage_my_resource =  (protocol:Protocol, param:any) => {
@@ -12,20 +12,22 @@ export const manage_my_resource =  (protocol:Protocol, param:any) => {
 
     let resource = Resource.From(protocol, res_id);
     // add some to my resource
-    resource.add('my collection 1',  res_id);
-    resource.add('my collection 1',  '0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c');
-    resource.add('my collection 1',  '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09');
-    resource.add('my collection 2',  '0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c');
-    resource.add('my collection 2',  '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09');
-    resource.add('my collection 3',  '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09');
-    resource.add('my collection 3',  '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09');
-    resource.remove('my collection 2', '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09');
-    resource.remove('my collection 3', '', true);
+    resource.add('my collection 1',  [res_id]);
+    resource.add('my collection 1',  ['0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c',
+        '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09',
+        '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09'
+    ]);
+    resource.add('my collection 2',  ['0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c',
+        '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f08',
+    ]);
+    resource.add('my collection 3',  ['0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09']);
+    resource.remove('my collection 2', ['0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09']);
+    resource.remove('my collection 3', [], true);
     resource.rename('my collection 2', 'my collection 5');
 
-    resource.add_words(res_id, 'i like it.......................');
-    resource.add_words('0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c', 'i dislike it.......................');
-    resource.remove_words('0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c');
+    resource.add_tags(res_id, 'i like it.......................', ['a', 'b', 'abc']);
+    resource.add_tags('0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c', 'i dislike it.......................', ['a', 'b']);
+    resource.remove_tags('0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c');
 }
 
 export const like = (protocol:Protocol, param: any) => {
@@ -44,8 +46,9 @@ export const like = (protocol:Protocol, param: any) => {
 
 export const avatar = (protocol:Protocol, param: any) => {
     let wowok_entity =  Entity.From(protocol);
-    let personal:Entity_Info = {name:'Jack Chou', description:'hahah', avatar:'https://wowok.ai/0x123.png', twitter:'@Wowok_Ai',
-        discord:'https://discord.gg/JbYneRzB8a', homepage:'https://github.com/wowok-ai/sdk/wiki'}
+/*    let personal:Entity_Info = {name:'Jack Chou', description:'hahah', avatar:'https://wowok.ai/0x123.png', twitter:'@Wowok_Ai',
+        discord:'https://discord.gg/JbYneRzB8a', homepage:'https://github.com/wowok-ai/sdk/wiki'}*/
+    let personal = {name:'hi'}
     wowok_entity.update(personal);
 }
 
