@@ -14,9 +14,9 @@ import { create_my_resource, manage_my_resource, like, avatar, transfer_resource
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
-    await test_personal(protocol, '');
-    //await test_exes(protocol);
-    //await test_future_objects(protocol)
+    await test_exes(protocol);
+    // await test_future_objects(protocol)
+    //await test_personal(protocol, ''); // old resource id
 }  
 
 function sleep(ms: number): Promise<void> {
@@ -86,7 +86,11 @@ const test_exes = async (protocol:Protocol) => {
         [test_repository_launch], 
         TEST_PRIV(), ids), ids); 
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_repository_policy, test_machine_launch], 
+        [test_repository_policy], 
+        TEST_PRIV(), ids), ids);
+    console.log('repository id: ' + ids.get('repository::Repository'));
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+        [test_machine_launch], 
         TEST_PRIV(), ids), ids);
     console.log('machine id: ' + ids.get('machine::Machine'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(

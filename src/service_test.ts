@@ -59,7 +59,7 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
 
     let service = Service.New(protocol, SERVICE_PAY_TYPE, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') ;
     service.set_machine(machine);
-    service.add_sale([service_sales1, service_sales2]);
+    service.add_sales([service_sales1, service_sales2]);
     service.add_stock(service_sales1.item, 10000); // increase stock
     service.set_price(service_sales2.item, 8); // reduce price
     service.discount_transfer([discount1, discount2]);

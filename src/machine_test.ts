@@ -3,9 +3,12 @@ import { MachineObject, ProgressObject, Machine_Node, Protocol, Machine, Progres
 
 export const node_order_comfirmed:Machine_Node = {
     name: 'order confirmed',
-    description: 'node1',
     pairs: [
         {prior_node: Machine.INITIAL_NODE_NAME, threshold:10, forwards:[
+            {name:'confirm order', weight: 5, permission:10000},
+            {name:'confirm express', weight: 5, permission:10002},
+        ]},
+        {prior_node: 'order confirmed', threshold:10, forwards:[ // self-self
             {name:'confirm order', weight: 5, permission:10000},
             {name:'confirm express', weight: 5, permission:10002},
         ]}
@@ -13,7 +16,6 @@ export const node_order_comfirmed:Machine_Node = {
 }
 export const node_order_delivered:Machine_Node = {
     name: 'order delivered',
-    description: 'node2',
     pairs: [
         {prior_node: node_order_comfirmed.name, threshold:0, forwards:[
             {name:'pick up dilivery - JD', namedOperator:'JD'},
@@ -29,7 +31,6 @@ export const node_order_delivered:Machine_Node = {
 }
 export const node_order_signed:Machine_Node = {
     name: 'order signed',
-    description: 'node3',
     pairs: [
         {prior_node: node_order_delivered.name, threshold:0, forwards:[
             {name:'payer signed', namedOperator: Machine.OPERATOR_ORDER_PAYER},
@@ -38,7 +39,6 @@ export const node_order_signed:Machine_Node = {
 }
 export const node_order_canceled:Machine_Node = {
     name: 'order canceled',
-    description: 'node4',
     pairs: [
         {prior_node: Machine.INITIAL_NODE_NAME, threshold:0, forwards:[
             {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
@@ -61,7 +61,6 @@ export const test_machine_launch = async (protocol:Protocol, param:any) => {
     let repo = param.get('repository::Repository')? param.get('repository::Repository')[0] : undefined;
 
     let m = Machine.New(protocol, permission, 'mmmm....', 'https://best-service.com/');
-
     m.add_node([node_order_comfirmed, node_order_delivered, node_order_signed, node_order_canceled]);
     m.set_endpoint();
     m.set_endpoint('https://best-service.com/order-ops/');
@@ -70,14 +69,12 @@ export const test_machine_launch = async (protocol:Protocol, param:any) => {
     if (repo) {
         m.add_repository(repo);
     }
-
     m.pause(true);
     m.launch();
 }
 
 export const node_order_delivered2:Machine_Node = {
     name: 'order delivered',
-    description: 'node5',
     pairs: [
         {prior_node: node_order_comfirmed.name, threshold:0, forwards:[
             {name:'pick up dilivery - JD', namedOperator:'JD'},
@@ -93,7 +90,6 @@ export const node_order_delivered2:Machine_Node = {
 }
 export const node_order_canceled2:Machine_Node = {
     name: 'order canceled',
-    description: 'node6',
     pairs: [
         {prior_node: Machine.INITIAL_NODE_NAME, threshold:0, forwards:[
             {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
@@ -121,7 +117,7 @@ export const test_machine_edit_nodes = async (protocol:Protocol, param:any) => {
     new_machine.remove_repository([], true); // must use permission2
     new_machine.remove_node(['order delivered', 'order canceled'])
     new_machine.add_node([node_order_canceled2, node_order_delivered2]) 
-    new_machine.publish()
+  //  new_machine.publish()
     new_machine.launch();
 }
 
@@ -130,7 +126,7 @@ export const test_machine_progress = async (protocol:Protocol, param:any) => {
     let permission = param.get('permission::Permission')[0] as string; // permission 0
     let machine = Machine.From(protocol, permission, param.get('machine::Machine')[0]);
     machine.pause(false); // machine.bPaused=false & machine.bPublished=true, before creating progress for it
-    let progress1 = Progress.New(protocol, machine.get_object(), permission);
+    let progress1 = Progress.New(protocol, machine.get_object(), permission, '0xb4a210d9f40dae7693f0362419aecd2125651f6dc2393e42ecf35f38578ac7d7');
     progress1.launch();
 }
 
@@ -143,12 +139,16 @@ export const test_progress_run1 = async (protocol:Protocol, param:any) => {
         return 
     }
     let progress = Progress.From(protocol, machine, permission, param.get('progress::Progress')[0]);
+    progress.parent({parent_id:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f',
+        parent_session_id:0, next_node:'abc', forward:'abc'
+    })
     progress.set_namedOperator(Machine.OPERATOR_ORDER_PAYER, [TEST_ADDR()]);
     progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
     progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, false);
     progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
     progress.next({next_node_name:node_order_comfirmed.name, forward:'confirm order'}); // wight 5; threshold:10
-    progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'});
+    progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm express'}, true);
+//    progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'});
 }
 
 // machine could generate progresses while PUBLISHED

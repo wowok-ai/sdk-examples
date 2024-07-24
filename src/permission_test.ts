@@ -3,12 +3,12 @@ import { TEST_ADDR } from './common'
 
 const permission_entity_1 : Permission_Entity = {
     entity_address: TEST_ADDR(),
-    permissions: [{index:PermissionIndex.machine_add_node}, {index:PermissionIndex.machine}],
+    permissions: [{index:PermissionIndex.machine_node}, {index:PermissionIndex.machine}],
 }
 const permission_entity_2 : Permission_Entity = {
     entity_address: '0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c',
     permissions: [{index:PermissionIndex.demand}, {index:PermissionIndex.machine},  
-        {index:PermissionIndex.machine},  {index:PermissionIndex.vote_add_guard}],
+        {index:PermissionIndex.machine},  {index:PermissionIndex.vote_guard}],
 }
 const permission_entity_3 : Permission_Entity = {
     entity_address: '0xe8778267a777a5f4cc1df30c97fa788c5acb7905fab01e1a7429da622efe48a8',
