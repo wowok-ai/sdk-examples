@@ -84,21 +84,21 @@ export const test_guard_passport = async(protocol:Protocol, param:any) => {
         return 
     }
 
-    let parser = await GuardParser.CreateAsync(protocol, [g1, g2]);
-    parser.guardlist().forEach(g => {
-        // hardcode here: see guard rules
-        g.input_witness.forEach((f => {f.future  = progress; }))
-        g.query_list.forEach((f => { 
-            if (typeof(f) !== 'string') {
-                f.future = progress;
-        }}));
+    let parser = await GuardParser.Create([g1, g2]);
+    if (!parser) {
+        console.log('test_guard_passport parser null');
+        return 
+    }
 
-        g.constant.forEach((f => {f.future  = progress; }))
-    });
-
-    let query = await parser.done();
-    protocol.CurrentSession().setGasBudget(500000000); // increase gas budget
-    let passport = new Passport(protocol, query)
+    const fill = parser.future_fills();
+    fill.forEach((v) => v.future = progress);
+    let query = await parser.done(fill);
+    if (!query) {
+        console.log('test_guard_passport query null')
+        return;
+    }
+    // protocol.CurrentSession().setGasBudget(500000000); // increase gas budget
+    let passport = new Passport(protocol, query, true)
     passport.freeze()
 }
 

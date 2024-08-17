@@ -26,10 +26,22 @@ export const test_reward_claim = async (protocol:Protocol, param:any) => {
     reward.lock_guards()
     reward.allow_repeat_claim(true);
 
-    let parser = await GuardParser.CreateAsync(protocol, [guard2]);
-    let query = await parser.done();
+    let parser = await GuardParser.Create([guard2]);
+    console.log(parser)
+    if (!parser) {
+        console.log('test_reward_claim parser null');
+        return 
+    }
 
-    let passport = new Passport(protocol, query); // use guard0 for passport
+    let query = await parser!.done();
+    console.log(query)
+    if (!query) {
+        console.log('test_reward_claim query null');
+        return 
+    }
+
+    // protocol.CurrentSession().setGasBudget(500000000); // increase gas budget
+    let passport = new Passport(protocol, query, true); // use guard0 for passport
     reward.claim(passport.get_object());
     passport.freeze() // destory or freeze passport while used
 }

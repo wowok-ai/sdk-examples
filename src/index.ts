@@ -15,7 +15,7 @@ import { create_my_resource, manage_my_resource, like, avatar, transfer_resource
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
     await test_exes(protocol);
-    // await test_future_objects(protocol)
+    await test_future_objects(protocol)
     //await test_personal(protocol, ''); // old resource id
 }  
 
@@ -52,7 +52,6 @@ const test_future_objects = async (protocol:Protocol) => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_guard_passport], TEST_PRIV(), ids), ids);
     console.log(ids); 
-
     test_guard_to_object(protocol, ids);
 }
 /*
