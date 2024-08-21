@@ -112,6 +112,12 @@ export const test_guard_launch_number = async(protocol:Protocol, param:any) => {
     Guard.launch(protocol, 'entity adress count > 2', sense1);
 }
 
+export const test_guard_true = async(protocol:Protocol, param:any)  => {
+    let maker = new GuardMaker();
+    maker.add_logic(OperatorType.TYPE_LOGIC_ALWAYS_TRUE);
+    Guard.launch(protocol, 'always true', maker.build());
+}
+
 export const test_guard_launch_permission_builder = async(protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
 

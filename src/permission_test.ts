@@ -3,7 +3,7 @@ import { TEST_ADDR } from './common'
 
 const permission_entity_1 : Permission_Entity = {
     entity_address: TEST_ADDR(),
-    permissions: [{index:PermissionIndex.machine_node}, {index:PermissionIndex.machine}],
+    permissions: [{index:PermissionIndex.demand_expand_time}, {index:PermissionIndex.demand_set_description}],
 }
 const permission_entity_2 : Permission_Entity = {
     entity_address: '0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c',
@@ -40,5 +40,6 @@ export const test_permission_set_guard = async(protocol:Protocol, param:any) => 
     let permission = Permission.From(protocol, p);
     permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[0].index, g1); // set 
     permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[0].index);  // unset
-    permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[0].index, g2);  // set
+    permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[0].index, g1); // set 
+    permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[1].index, g2);  // set
 }
