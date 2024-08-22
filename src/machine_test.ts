@@ -1,5 +1,5 @@
 import { TEST_ADDR } from './common'
-import { MachineObject, ProgressObject, Machine_Node, Protocol, Machine, Progress, Guard, Permission} from 'wowok';
+import { MachineObject, ProgressObject, Machine_Node, Protocol, Machine, Progress, Guard, Permission, TxbObject} from 'wowok';
 
 export const node_order_comfirmed:Machine_Node = {
     name: 'order confirmed',
@@ -60,7 +60,7 @@ export const test_machine_launch = async (protocol:Protocol, param:any) => {
     let permission1 = param.get('permission::Permission')[1];    
     let repo = param.get('repository::Repository')? param.get('repository::Repository')[0] : undefined;
 
-    let m = Machine.New(protocol, permission, 'mmmm....', 'https://best-service.com/');
+    let m = Machine.New(protocol.CurrentSession(), permission, 'mmmm....', 'https://best-service.com/');
     m.add_node([node_order_comfirmed, node_order_delivered, node_order_signed, node_order_canceled]);
     m.set_endpoint();
     m.set_endpoint('https://best-service.com/order-ops/');
@@ -109,9 +109,9 @@ export const node_order_canceled2:Machine_Node = {
 export const test_machine_edit_nodes = async (protocol:Protocol, param:any) => {
     let permission = param.get('permission::Permission')[0];
     let permission1 = param.get('permission::Permission')[1];
-    let machine = Machine.From(protocol,  permission, param.get('machine::Machine')[0]);
+    let machine = Machine.From(protocol.CurrentSession(),  permission, param.get('machine::Machine')[0]);
 
-    let new_machine = Machine.From(protocol, permission, machine.clone());
+    let new_machine = Machine.From(protocol.CurrentSession(), permission, machine.clone());
     new_machine.set_description('our new machine for test') 
     new_machine.change_permission(permission1);
     new_machine.remove_repository([], true); // must use permission2
@@ -124,9 +124,9 @@ export const test_machine_edit_nodes = async (protocol:Protocol, param:any) => {
 // machine could generate progresses while PUBLISHED
 export const test_machine_progress = async (protocol:Protocol, param:any) => {
     let permission = param.get('permission::Permission')[0] as string; // permission 0
-    let machine = Machine.From(protocol, permission, param.get('machine::Machine')[0]);
+    let machine = Machine.From(protocol.CurrentSession(), permission, param.get('machine::Machine')[0]);
     machine.pause(false); // machine.bPaused=false & machine.bPublished=true, before creating progress for it
-    let progress1 = Progress.New(protocol, machine.get_object(), permission, '0xb4a210d9f40dae7693f0362419aecd2125651f6dc2393e42ecf35f38578ac7d7');
+    let progress1 = Progress.New(protocol.CurrentSession(), machine.get_object() as TxbObject, permission, '0xb4a210d9f40dae7693f0362419aecd2125651f6dc2393e42ecf35f38578ac7d7');
     progress1.launch();
 }
 
@@ -138,7 +138,7 @@ export const test_progress_run1 = async (protocol:Protocol, param:any) => {
         console.log('test_progress_run1 param error');
         return 
     }
-    let progress = Progress.From(protocol, machine, permission, param.get('progress::Progress')[0]);
+    let progress = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[0]);
     progress.parent({parent_id:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f',
         parent_session_id:0, next_node:'abc', forward:'abc'
     })
@@ -159,6 +159,6 @@ export const test_progress_run2 = async (protocol:Protocol, param:any) => {
         console.log('test_progress_run2 param error');
         return 
     }
-    let progress = Progress.From(protocol, machine, permission, param.get('progress::Progress')[0]);
+    let progress = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[0]);
     progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'}); // wight 5; threshold:10
 }

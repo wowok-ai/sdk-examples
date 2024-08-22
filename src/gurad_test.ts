@@ -12,15 +12,15 @@ export const test_guard_launch_creator_equal = async(protocol:Protocol, param:an
     maker.add_logic(OperatorType.TYPE_LOGIC_EQUAL); // equal
 
     const sense1 = maker.build() ;
-    Guard.launch(protocol, 'two permissions\' creator equal', sense1); // guard1
+    Guard.launch(protocol.CurrentSession(), 'two permissions\' creator equal', sense1); // guard1
 }
 
 export const test_guard_launch_signer = async(protocol:Protocol, param:any) => {
-    Guard.signer_guard(protocol)
+    Guard.signer_guard(protocol.CurrentSession())
 }
 
 export const test_guard_launch_everyone = async(protocol:Protocol, param:any) => {
-    Guard.everyone_guard(protocol)
+    Guard.everyone_guard(protocol.CurrentSession())
 }
 
 export const test_guard_launch_substring = async(protocol:Protocol, param:any) => {
@@ -29,7 +29,7 @@ export const test_guard_launch_substring = async(protocol:Protocol, param:any) =
     maker.add_param(ValueType.TYPE_VEC_U8, "WOWOK"); 
     maker.add_logic(OperatorType.TYPE_LOGIC_HAS_SUBSTRING); // substring
     const sense1 = maker.build() ;
-    Guard.launch(protocol, 'sub string', sense1)
+    Guard.launch(protocol.CurrentSession(), 'sub string', sense1)
 }
 
 export const test_guard_future_object = async(protocol:Protocol, param:any) => {
@@ -53,8 +53,8 @@ export const test_guard_future_object = async(protocol:Protocol, param:any) => {
             .build(); // BE TRUE: !(machine object's progress id == permission object's builder)
 
     // launch 2 guards
-    Guard.launch(protocol, 'future progress has parent?', maker) // BE FALSE
-    Guard.launch(protocol, 'future progress has parent? OR !(machine object\'s progress id == permission object\'s builder)', 
+    Guard.launch(protocol.CurrentSession(), 'future progress has parent?', maker) // BE FALSE
+    Guard.launch(protocol.CurrentSession(), 'future progress has parent? OR !(machine object\'s progress id == permission object\'s builder)', 
         maker.combine(maker2, false)) // BE TRUE: sense(FALSE) or sense2(TRUE)
 }
 
@@ -98,7 +98,7 @@ export const test_guard_passport = async(protocol:Protocol, param:any) => {
         return;
     }
     // protocol.CurrentSession().setGasBudget(500000000); // increase gas budget
-    let passport = new Passport(protocol, query, true)
+    let passport = new Passport(protocol.CurrentSession(), query, true)
     passport.freeze()
 }
 
@@ -109,13 +109,13 @@ export const test_guard_launch_number = async(protocol:Protocol, param:any) => {
     maker.add_param(ValueType.TYPE_U64, 2); 
     maker.add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER); // GREATER than 2
     const sense1 = maker.build();
-    Guard.launch(protocol, 'entity adress count > 2', sense1);
+    Guard.launch(protocol.CurrentSession(), 'entity adress count > 2', sense1);
 }
 
 export const test_guard_true = async(protocol:Protocol, param:any)  => {
     let maker = new GuardMaker();
     maker.add_logic(OperatorType.TYPE_LOGIC_ALWAYS_TRUE);
-    Guard.launch(protocol, 'always true', maker.build());
+    Guard.launch(protocol.CurrentSession(), 'always true', maker.build());
 }
 
 export const test_guard_launch_permission_builder = async(protocol:Protocol, param:any) => {
@@ -126,7 +126,7 @@ export const test_guard_launch_permission_builder = async(protocol:Protocol, par
     maker.add_param(ContextType.TYPE_SIGNER); // signer
     maker.add_logic(OperatorType.TYPE_LOGIC_EQUAL); // SINGER MUST BE perssion_id's builder
     const sense1 = maker.build();
-    Guard.launch(protocol, 'permission builder address equals singer address', sense1);
+    Guard.launch(protocol.CurrentSession(), 'permission builder address equals singer address', sense1);
 }
 
 export const test_constant_launch_creator_equal = async (protocol:Protocol, param:any) => {
@@ -141,5 +141,5 @@ export const test_constant_launch_creator_equal = async (protocol:Protocol, para
     maker.add_logic(OperatorType.TYPE_LOGIC_EQUAL); // BE TRUE: equal
 
     let sense1 = maker.build(true) ; // BE FALSE: !(permission1 builder == permission2 builder)
-    Guard.launch(protocol, 'two permissions\' creator NOT equal', sense1.combine(sense1, true, true)); // BE FALSE: sense1 and sense1
+    Guard.launch(protocol.CurrentSession(), 'two permissions\' creator NOT equal', sense1.combine(sense1, true, true)); // BE FALSE: sense1 and sense1
 }

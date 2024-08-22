@@ -16,7 +16,7 @@ const permission_entity_3 : Permission_Entity = {
 }
 
 export const test_permission_launch = async(protocol:Protocol, param:any) => {
-    let p = Permission.New(protocol, 'permission test');
+    let p = Permission.New(protocol.CurrentSession(), 'permission test');
 
     p.add_entity([permission_entity_1, permission_entity_2]);
     p.add_entity([permission_entity_3, permission_entity_2]);
@@ -37,7 +37,7 @@ export const test_permission_set_guard = async(protocol:Protocol, param:any) => 
         console.log('test_permission_set_guard error 1');
         return 
     }
-    let permission = Permission.From(protocol, p);
+    let permission = Permission.From(protocol.CurrentSession(), p);
     permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[0].index, g1); // set 
     permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[0].index);  // unset
     permission.set_guard(permission_entity_1.entity_address, permission_entity_1.permissions[0].index, g1); // set 
