@@ -1,13 +1,11 @@
 
 
 import { Repository, Repository_Policy_Data, Repository_Policy_Mode, Repository_Policy, Protocol, ValueType, Bcs, RepositoryValueType} from 'wowok';
-import { bcs, BCS, toHEX, fromHEX, getSuiMoveConfig } from '@mysten/bcs';
 
 export const test_repository_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
 
     let r = Repository.New(protocol.CurrentSession(), permission_id, 'test repository', Repository_Policy_Mode.POLICY_MODE_FREE);
-    let bcs = new BCS(getSuiMoveConfig());
 
     let data_order_number:Repository_Policy_Data = {key:'order number', data:[
         {address:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_VEC_U8, new TextEncoder().encode('abcd-efg-3128'))},
