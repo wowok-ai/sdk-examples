@@ -26,7 +26,7 @@ export const test_reward_claim = async (protocol:Protocol, param:any) => {
     reward.lock_guards()
     reward.allow_repeat_claim(true);
 
-    let parser = await GuardParser.Create([guard2]);
+    let parser = await GuardParser.Create([guard1]);
 
     if (!parser) {
         console.log('test_reward_claim parser null');

@@ -72,7 +72,7 @@ const test_exes = async (protocol:Protocol) => {
     console.log('permission id: ' + ids.get('permission::Permission'));
     // object random sequence by rpc-get-objects !!  
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_guard_true, test_guard_true], 
+        [test_guard_true], 
         TEST_PRIV(), ids), ids);
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_constant_launch_creator_equal], 

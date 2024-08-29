@@ -3,7 +3,7 @@ import { TEST_ADDR } from './common'
 
 const permission_entity_1 : Permission_Entity = {
     entity_address: TEST_ADDR(),
-    permissions: [{index:PermissionIndex.demand_expand_time}, {index:PermissionIndex.demand_set_description}],
+    permissions: [{index:PermissionIndex.demand_expand_time}, {index:PermissionIndex.demand_description}],
 }
 const permission_entity_2 : Permission_Entity = {
     entity_address: '0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c',
