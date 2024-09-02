@@ -20,8 +20,6 @@ export const test_demand_yes = async (protocol:Protocol, param:any) => {
     let s1 = param.get('service::Service')[0];
     let s2 = param.get('service::Service')[1];
     if (!s1 || !s2 || !perm) {
-        console.log("test_demand_yes param error");
-        console.log(s1); console.log(s2); console.log(perm)
         return
     }
     // demand earnest_type must equal that demand created by
