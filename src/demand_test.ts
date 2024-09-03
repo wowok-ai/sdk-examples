@@ -4,7 +4,7 @@ import { SERVICE_PAY_TYPE } from './service_test'
 export const test_demand_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
     let txb = protocol.CurrentSession();
-    let d = Demand.New(txb, Protocol.SUI_COIN_TYPE, permission_id, 'demand TEST', 
+    let d = Demand.New(txb, Protocol.SUI_COIN_TYPE, true, 10000000000, permission_id, 'demand TEST', 
         txb.splitCoins(txb.gas, [10000000]));
     d.deposit(txb.splitCoins(txb.gas,[200000]));
     d.deposit(txb.splitCoins(txb.gas,[200000]));

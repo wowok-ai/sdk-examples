@@ -69,7 +69,7 @@ const test_guard_queries = async (protocol:Protocol) => {
 const test_exes = async (protocol:Protocol) => {
     let ids = new Map<string, TxbObject[]>();
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch, test_permission_launch], TEST_PRIV(), ids), ids);
-    console.log('permission id: ' + ids.get('permission::Permission'));
+    console.log('permission id: ' + ids.get('permission::Permission')); 
     // object random sequence by rpc-get-objects !!  
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_guard_true], 

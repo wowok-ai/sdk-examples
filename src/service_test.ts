@@ -8,30 +8,30 @@ export const SERVICE_PAY_TYPE = Protocol.SUI_TOKEN_TYPE;
 
 const service_sales1:Service_Sale = {
     item:'cup A',
-    price: 3,
-    stock: 10,
+    price: BigInt(3),
+    stock: BigInt(10111),
 }
 const service_sales2:Service_Sale = {
     item:'cup B',
-    price: 13,
-    stock: 220,
+    price: BigInt(13),
+    stock: BigInt(22),
 }
 const service_buy1: Service_Buy = {
     item: service_sales1.item,
-    max_price: 3,
-    count: 200,
+    max_price: BigInt(3),
+    count: BigInt(200),
 }
 const service_buy2: Service_Buy = {
     item: service_sales2.item,
-    max_price: 13,
-    count: 1,
+    max_price: BigInt(13),
+    count: BigInt(1),
 }
 const discount1 : DicountDispatch = {
     receiver: TEST_ADDR(),
-    count: 10,
+    count: BigInt(10),
     discount:{
         name:'discounts for cup service ',
-        price_greater: 100,
+        price_greater: BigInt(100),
         type:Service_Discount_Type.ratio,
         off: 20,
         duration_minutes: 1000000,
@@ -39,7 +39,7 @@ const discount1 : DicountDispatch = {
 }
 const discount2 : DicountDispatch = {
     receiver: TEST_ADDR(),
-    count: 1,
+    count: BigInt(1),
     discount:{
         name:'discount',
         type:Service_Discount_Type.minus,
@@ -60,8 +60,8 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
     let service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') ;
     service.set_machine(machine);
     service.add_sales([service_sales1, service_sales2]);
-    service.add_stock(service_sales1.item, 10000); // increase stock
-    service.set_price(service_sales2.item, 8); // reduce price
+    service.add_stock(service_sales1.item, BigInt(10000)); // increase stock
+    service.set_price(service_sales2.item, BigInt(8)); // reduce price
     service.discount_transfer([discount1, discount2]);
     service.publish(); 
     service.launch();
