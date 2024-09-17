@@ -7,8 +7,8 @@ export const test_guard_launch_creator_equal = async(protocol:Protocol, param:an
     let permission_id2 = param.get('permission::Permission')[1];
 
     let maker = new GuardMaker();
-    maker.add_query(MODULES.permission, 'Builder', permission_id1); // permission1 builder
-    maker.add_query(MODULES.permission, 'Builder', permission_id2); // permission2 builder
+    maker.add_query(MODULES.permission, 'Owner', permission_id1); // permission1 builder
+    maker.add_query(MODULES.permission, 'Owner', permission_id2); // permission2 builder
     maker.add_logic(OperatorType.TYPE_LOGIC_EQUAL); // equal
 
     const sense1 = maker.build() ;
@@ -42,13 +42,13 @@ export const test_guard_future_object = async(protocol:Protocol, param:any) => {
 
     let maker = new GuardMaker();
     let identifer = maker.add_constant(ContextType.TYPE_WITNESS_ID, machine);
-    maker = maker.add_query(MODULES.progress, 'Has Parent', identifer, true)
+    maker = maker.add_query(MODULES.progress, 'Has Parent?', identifer, true)
                 .build(true);// BE FALSE
 
     let maker2 = new GuardMaker();
     identifer = maker2.add_constant(ContextType.TYPE_WITNESS_ID, machine);
     maker2 = maker2.add_param(ContextType.TYPE_CONSTANT, identifer)
-            .add_query(MODULES.permission, 'Builder', permission)
+            .add_query(MODULES.permission, 'Owner', permission)
             .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // machine's  futrue progress-id equals permission's builder[always false]4
             .build(); // BE TRUE: !(machine object's progress id == permission object's builder)
 
@@ -105,7 +105,7 @@ export const test_guard_passport = async(protocol:Protocol, param:any) => {
 export const test_guard_launch_number = async(protocol:Protocol, param:any) => {
     let permission_id1 = param.get('permission::Permission')[0];
     let maker = new GuardMaker();
-    maker.add_query(MODULES.permission, 'Entity Count', permission_id1); // entity address count
+    maker.add_query(MODULES.permission, 'Number of Entities', permission_id1); // entity address count
     maker.add_param(ValueType.TYPE_U64, 2); 
     maker.add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER); // GREATER than 2
     const sense1 = maker.build();
@@ -122,7 +122,7 @@ export const test_guard_launch_permission_builder = async(protocol:Protocol, par
     let permission_id = param.get('permission::Permission')[0];
 
     let maker = new GuardMaker();
-    maker.add_query(MODULES.permission, 'Builder', permission_id); // permission builder address
+    maker.add_query(MODULES.permission, 'Owner', permission_id); // permission builder address
     maker.add_param(ContextType.TYPE_SIGNER); // signer
     maker.add_logic(OperatorType.TYPE_LOGIC_EQUAL); // SINGER MUST BE perssion_id's builder
     const sense1 = maker.build();
@@ -136,8 +136,8 @@ export const test_constant_launch_creator_equal = async (protocol:Protocol, para
     let maker = new GuardMaker();
     let id1 = maker.add_constant(ValueType.TYPE_ADDRESS, permission_id1);
     let id2 = maker.add_constant(ValueType.TYPE_ADDRESS, permission_id2);
-    maker.add_query(MODULES.permission, 'Builder', id1); // permission1 builder
-    maker.add_query(MODULES.permission, 'Builder', id2); // permission2 builder
+    maker.add_query(MODULES.permission, 'Owner', id1); // permission1 builder
+    maker.add_query(MODULES.permission, 'Owner', id2); // permission2 builder
     maker.add_logic(OperatorType.TYPE_LOGIC_EQUAL); // BE TRUE: equal
 
     let sense1 = maker.build(true) ; // BE FALSE: !(permission1 builder == permission2 builder)

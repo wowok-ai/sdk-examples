@@ -1,5 +1,5 @@
 
-import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser} from 'wowok';
+import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok} from 'wowok';
 import { TEST_PRIV, TEST_ADDR } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission_test'
 import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_signer, test_guard_launch_substring,
