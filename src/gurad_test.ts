@@ -42,7 +42,7 @@ export const test_guard_future_object = async(protocol:Protocol, param:any) => {
 
     let maker = new GuardMaker();
     let identifer = maker.add_constant(ContextType.TYPE_WITNESS_ID, machine);
-    maker = maker.add_query(MODULES.progress, 'Has Parent?', identifer, true)
+    maker = maker.add_query(MODULES.progress, 'Has Parent', identifer, true)
                 .build(true);// BE FALSE
 
     let maker2 = new GuardMaker();

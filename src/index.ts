@@ -38,17 +38,17 @@ const test_personal = async (protocol:Protocol, old_personal_resource:string) =>
 const test_future_objects = async (protocol:Protocol) => {
     let ids = new Map<string, TxbObject[]>();
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch, test_permission_launch], TEST_PRIV(), ids), ids);
-    console.log('permission id: ' + ids.get('permission::Permission'));
+    console.log('permission id: ' + ids.get('permission::Permission')); sleep(3000)
     // object random sequence by rpc-get-objects !!  
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_machine_launch], TEST_PRIV(), ids), ids);
-    console.log('machine id: ' + ids.get('machine::Machine'));
+    console.log('machine id: ' + ids.get('machine::Machine')); sleep(1000)
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_machine_progress], TEST_PRIV(), ids), ids);
-    console.log('progress id: ' + ids.get('progress::Progress'));
+    console.log('progress id: ' + ids.get('progress::Progress')); sleep(1000)
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_guard_future_object], TEST_PRIV(), ids), ids);
-    console.log('guard id: ' + ids.get('guard::Guard'));
+    console.log('guard id: ' + ids.get('guard::Guard')); sleep(1000)
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_guard_passport], TEST_PRIV(), ids), ids);
     console.log(ids); 
