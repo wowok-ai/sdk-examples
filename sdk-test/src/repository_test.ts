@@ -15,8 +15,13 @@ export const test_repository_launch = async (protocol:Protocol, param:any) => {
         {address:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_U64, 0)},
         {address:'0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_U64, 1234675)},
     ], value_type:ValueType.TYPE_U64}
+    let data_order_ch:Repository_Policy_Data = {key:'中国', data:[
+        {address:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_U64, 0)},
+        {address:'0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_U64, 1234675)},
+    ], value_type:ValueType.TYPE_U64}
     r.add_data(data_order_number);
     r.add_data(data_order_time);
+    r.add_data(data_order_ch);
     r.remove('0xe8778267a777a5f4cc1df30c97fa788c5acb7905fab01e1a7429da622efe48a8', 'order number');
 
     let po1:Repository_Policy = {
