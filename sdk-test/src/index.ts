@@ -15,7 +15,7 @@ import { create_my_resource, manage_my_resource, like, avatar, transfer_resource
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
     await test_exes(protocol);
-    await test_future_objects(protocol)
+    //await test_future_objects(protocol)
     //await test_personal(protocol, ''); // old resource id
 }  
 
@@ -37,7 +37,9 @@ const test_personal = async (protocol:Protocol, old_personal_resource:string) =>
 
 const test_future_objects = async (protocol:Protocol) => {
     let ids = new Map<string, TxbObject[]>();
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch, test_permission_launch], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
+    console.log('permission id: ' + ids.get('permission::Permission')); sleep(3000)
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
     console.log('permission id: ' + ids.get('permission::Permission')); sleep(3000)
     // object random sequence by rpc-get-objects !!  
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
@@ -101,7 +103,13 @@ const test_exes = async (protocol:Protocol) => {
         [test_machine_edit_nodes, test_machine_progress], 
         TEST_PRIV(), ids), ids);
     console.log('progress id: ' + ids.get('progress::Progress'));
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+        [test_machine_progress], 
+        TEST_PRIV(), ids), ids);
+    console.log('progress id: ' + ids.get('progress::Progress'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run1], TEST_PRIV(), ids));
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run2], TEST_PRIV(), ids));
+    console.log('run progress ready.')
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_service_launch, test_demand_launch,  test_service_launch], TEST_PRIV(), ids), ids);
     console.log('service id: ' + ids.get('service::Service'))

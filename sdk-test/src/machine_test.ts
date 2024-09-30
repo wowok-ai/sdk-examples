@@ -138,16 +138,15 @@ export const test_progress_run1 = async (protocol:Protocol, param:any) => {
         console.log('test_progress_run1 param error');
         return 
     }
-    let progress = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[0]);
-    progress.parent({parent_id:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f',
-        parent_session_id:0, next_node:'abc', forward:'abc'
-    })
-    progress.set_namedOperator(Machine.OPERATOR_ORDER_PAYER, [TEST_ADDR()]);
-    progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
-    progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, false);
-    progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
-    progress.next({next_node_name:node_order_comfirmed.name, forward:'confirm order'}); // wight 5; threshold:10
-    progress.hold({next_node_name:node_order_comfirmed.name, forward:'confirm express'}, true);
+    let parent = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[0]);
+
+    parent.set_namedOperator(Machine.OPERATOR_ORDER_PAYER, [TEST_ADDR()]);
+    parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
+    parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, false);
+    parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
+    parent.next({next_node_name:node_order_comfirmed.name, forward:'confirm order'}); // wight 5; threshold:10
+    parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm express'}, true);
+
 //    progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'});
 }
 
@@ -161,4 +160,9 @@ export const test_progress_run2 = async (protocol:Protocol, param:any) => {
     }
     let progress = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[0]);
     progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'}); // wight 5; threshold:10
+    let child = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[1]);
+
+    child.parent({parent_id:param.get('progress::Progress')[0],
+        parent_session_id:0, next_node:node_order_canceled.name, forward:'payed canceled'
+    })
 }
