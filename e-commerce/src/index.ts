@@ -37,12 +37,19 @@ const main = async () => {
     // reward
 
     // test service
-
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service_run], TEST_PRIV(), ids), ids);
     console.log(ids); 
 }  
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const service_run = async (protocol:Protocol, param:any) => {
+    const machine = param.get('machine::Machine')[0] ;
+    const permission = param.get('permission::Permission')[0] ;
+    const service = param.get('service::Service')[0];
+
 }
 
 enum BUSINESS { // business permission for Permission Object must >= 1000
@@ -113,6 +120,7 @@ const order_completed:Machine_Node = {
         ]},
     ]
 }
+
 const goods_lost:Machine_Node = {
     name: 'Goods lost',
     pairs: [
@@ -234,41 +242,41 @@ const guard = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     // Receipt will be signed by default 15 days after delivery
     const receipt = new GuardMaker();
-    const receipt_machine_witness = receipt.add_constant(ContextType.TYPE_WITNESS_ID, machine);
+    const receipt_machine_witness = receipt.add_constant(ValueType.TYPE_ADDRESS, machine);
     receipt.add_param(ValueType.TYPE_U64, 1296000000) // 15 days
-        .add_query(MODULES.progress, 'Last Session Time', receipt_machine_witness, true)
+        .add_query(MODULES.progress, 'Last Session Time', receipt_machine_witness)
         .add_logic(OperatorType.TYPE_NUMBER_ADD) // +
         .add_param(ContextType.TYPE_CLOCK) // current tx time
         .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER_EQUAL) // 1: current tx time >= (last session time + 15 days)
         .add_param(ValueType.TYPE_STRING, goods_shippedout.name)
-        .add_query(MODULES.progress, 'Current Node', receipt_machine_witness, true)
+        .add_query(MODULES.progress, 'Current Node', receipt_machine_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 2: current node equals goods_shippedout
         .add_logic(OperatorType.TYPE_LOGIC_AND, 2); // 1 and 2
     Guard.launch(protocol.CurrentSession(), 'current on node '+goods_shippedout.name+ ' and current tx time >= (last session time + 15 days)', receipt.build());
     // withdraw guard: order completed or arbitrition
     const withdraw = new GuardMaker();
-    const withdraw_machine_witness = withdraw.add_constant(ContextType.TYPE_WITNESS_ID, machine);
+    const withdraw_machine_witness = withdraw.add_constant(ValueType.TYPE_ADDRESS, machine);
     const withdraw_completed = withdraw.add_constant(ValueType.TYPE_STRING, order_completed.name);
     const withdraw_dispute = withdraw.add_constant(ValueType.TYPE_STRING, dispute.name);
     withdraw.add_param(ContextType.TYPE_CONSTANT, withdraw_completed)
-        .add_query(MODULES.progress, 'Current Node', withdraw_machine_witness, true)
+        .add_query(MODULES.progress, 'Current Node', withdraw_machine_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
         .add_param(ContextType.TYPE_CONSTANT, withdraw_dispute)
-        .add_query(MODULES.progress, 'Current Node', withdraw_machine_witness, true)
+        .add_query(MODULES.progress, 'Current Node', withdraw_machine_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
         .add_logic(OperatorType.TYPE_LOGIC_OR);
     Guard.launch(protocol.CurrentSession(), 'Widthdraw Guard for Machine nodes', withdraw.build());
     
     // refund guard: order canceled or goods lost
     const refund = new GuardMaker();
-    const refund_machine_witness = refund.add_constant(ContextType.TYPE_WITNESS_ID, machine);
+    const refund_machine_witness = refund.add_constant(ValueType.TYPE_ADDRESS, machine);
     const refund_canceled = refund.add_constant(ValueType.TYPE_STRING, order_cancellation.name);
     const refund_goods_lost = refund.add_constant(ValueType.TYPE_STRING, goods_lost.name);
     refund.add_param(ContextType.TYPE_CONSTANT, refund_canceled)
-        .add_query(MODULES.progress, 'Current Node', refund_machine_witness, true)
+        .add_query(MODULES.progress, 'Current Node', refund_machine_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
         .add_param(ContextType.TYPE_CONSTANT, refund_goods_lost)
-        .add_query(MODULES.progress, 'Current Node', refund_machine_witness, true)
+        .add_query(MODULES.progress, 'Current Node', refund_machine_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
         .add_logic(OperatorType.TYPE_LOGIC_OR);
     Guard.launch(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build());
