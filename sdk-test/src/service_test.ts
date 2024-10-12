@@ -26,17 +26,17 @@ const service_buy2: Service_Buy = {
     max_price: BigInt(13),
     count: BigInt(1),
 }
-const discount1 : DicountDispatch = {
-    receiver: TEST_ADDR(),
-    count: BigInt(10),
-    discount:{
-        name:'discounts for cup service ',
-        price_greater: BigInt(100),
-        type:Service_Discount_Type.ratio,
-        off: 20,
-        duration_minutes: 1000000,
+    const discount1 : DicountDispatch = {
+        receiver: TEST_ADDR(),
+        count: BigInt(10),
+        discount:{
+            name:'discounts for cup service ',
+            price_greater: BigInt(100),
+            type:Service_Discount_Type.ratio,
+            off: 20,
+            duration_minutes: 1000000,
+        }
     }
-}
 const discount2 : DicountDispatch = {
     receiver: TEST_ADDR(),
     count: BigInt(1),
