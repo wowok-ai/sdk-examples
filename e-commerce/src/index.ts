@@ -23,12 +23,13 @@ const main = async () => {
     console.log('machine id: ' + ids.get('machine::Machine')); 
     
     // guard
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_receipt], TEST_PRIV(), ids), ids); // guard 0
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); // guard 1
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids); // guard 2
     console.log('guard id: ' + ids.get('guard::Guard'));  
 
     // publish machine
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([machine_publish], TEST_PRIV(), ids), ids);
-    console.log('machine id: ' + ids.get('machine::Machine')); 
 
     // service
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service], TEST_PRIV(), ids), ids);
@@ -49,7 +50,6 @@ const service_run = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     const permission = param.get('permission::Permission')[0] ;
     const service = param.get('service::Service')[0];
-
 }
 
 enum BUSINESS { // business permission for Permission Object must >= 1000
@@ -238,50 +238,95 @@ const service = async (protocol:Protocol, param:any) => {
     service.launch();
 }
 
-const guard = async (protocol:Protocol, param:any) => {
+const guard_receipt = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     // Receipt will be signed by default 15 days after delivery
     const receipt = new GuardMaker();
-    const receipt_machine_witness = receipt.add_constant(ValueType.TYPE_ADDRESS, machine);
+    const receipt_progress_witness = receipt.add_constant(ValueType.TYPE_ADDRESS); // witness of Progress
     receipt.add_param(ValueType.TYPE_U64, 1296000000) // 15 days
-        .add_query(MODULES.progress, 'Last Session Time', receipt_machine_witness)
+        .add_query(MODULES.progress, 'Last Session Time', receipt_progress_witness)
         .add_logic(OperatorType.TYPE_NUMBER_ADD) // +
         .add_param(ContextType.TYPE_CLOCK) // current tx time
         .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER_EQUAL) // 1: current tx time >= (last session time + 15 days)
         .add_param(ValueType.TYPE_STRING, goods_shippedout.name)
-        .add_query(MODULES.progress, 'Current Node', receipt_machine_witness)
+        .add_query(MODULES.progress, 'Current Node', receipt_progress_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 2: current node equals goods_shippedout
-        .add_logic(OperatorType.TYPE_LOGIC_AND, 2); // 1 and 2
+        .add_param(ValueType.TYPE_ADDRESS, machine) 
+        .add_query(MODULES.progress, 'Machine', receipt_progress_witness) 
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 3: progress'machine equals this machine
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 3); // 1 and 2 and 3
     Guard.launch(protocol.CurrentSession(), 'current on node '+goods_shippedout.name+ ' and current tx time >= (last session time + 15 days)', receipt.build());
+}
+
+const guard_withdraw = async (protocol:Protocol, param:any) => {
+    const machine = param.get('machine::Machine')[0] ;
     // withdraw guard: order completed or arbitrition
     const withdraw = new GuardMaker();
-    const withdraw_machine_witness = withdraw.add_constant(ValueType.TYPE_ADDRESS, machine);
+    const withdraw_progress_witness = withdraw.add_constant(ValueType.TYPE_ADDRESS);
     const withdraw_completed = withdraw.add_constant(ValueType.TYPE_STRING, order_completed.name);
     const withdraw_dispute = withdraw.add_constant(ValueType.TYPE_STRING, dispute.name);
     withdraw.add_param(ContextType.TYPE_CONSTANT, withdraw_completed)
-        .add_query(MODULES.progress, 'Current Node', withdraw_machine_witness)
+        .add_query(MODULES.progress, 'Current Node', withdraw_progress_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
         .add_param(ContextType.TYPE_CONSTANT, withdraw_dispute)
-        .add_query(MODULES.progress, 'Current Node', withdraw_machine_witness)
+        .add_query(MODULES.progress, 'Current Node', withdraw_progress_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
-        .add_logic(OperatorType.TYPE_LOGIC_OR);
+        .add_logic(OperatorType.TYPE_LOGIC_OR)
+        .add_param(ValueType.TYPE_ADDRESS, machine) 
+        .add_query(MODULES.progress, 'Machine', withdraw_progress_witness) 
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
     Guard.launch(protocol.CurrentSession(), 'Widthdraw Guard for Machine nodes', withdraw.build());
-    
+}
+
+const guard_refund = async (protocol:Protocol, param:any) => {
+    const machine = param.get('machine::Machine')[0] ;
     // refund guard: order canceled or goods lost
     const refund = new GuardMaker();
-    const refund_machine_witness = refund.add_constant(ValueType.TYPE_ADDRESS, machine);
+    const refund_progress_witness = refund.add_constant(ValueType.TYPE_ADDRESS);
     const refund_canceled = refund.add_constant(ValueType.TYPE_STRING, order_cancellation.name);
     const refund_goods_lost = refund.add_constant(ValueType.TYPE_STRING, goods_lost.name);
     refund.add_param(ContextType.TYPE_CONSTANT, refund_canceled)
-        .add_query(MODULES.progress, 'Current Node', refund_machine_witness)
+        .add_query(MODULES.progress, 'Current Node', refund_progress_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
         .add_param(ContextType.TYPE_CONSTANT, refund_goods_lost)
-        .add_query(MODULES.progress, 'Current Node', refund_machine_witness)
+        .add_query(MODULES.progress, 'Current Node', refund_progress_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
-        .add_logic(OperatorType.TYPE_LOGIC_OR);
+        .add_logic(OperatorType.TYPE_LOGIC_OR)
+        .add_param(ValueType.TYPE_ADDRESS, machine) 
+        .add_query(MODULES.progress, 'Machine', refund_progress_witness) 
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
     Guard.launch(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build());
 }
-
+/*
+const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
+    const machine = param.get('machine::Machine')[0] ;
+    const maker = new GuardMaker();
+    const progress = maker.add_constant(ValueType.TYPE_ADDRESS);
+    const completed_name = maker.add_constant(ValueType.TYPE_STRING, order_completed.name);
+    const lost_name = maker.add_constant(ValueType.TYPE_STRING, goods_lost.name);
+    const payer_forward_name = maker.add_constant(ValueType.TYPE_STRING, 'Payer confirmation');
+    maker.add_param(ContextType.TYPE_CONSTANT, payer_forward_name)
+        .add_param(ContextType.TYPE_CONSTANT, lost_name)
+        .add_param(ContextType.TYPE_CONSTANT, completed_name)
+        .add_query(MODULES.progress, 'Closest Forward time', progress) // time that payer confirmed
+        .add_param(ContextType.TYPE_CLOCK)
+        .add_param(ValueType.TYPE_U64, 86400000) // 24 hours
+        .add_logic(OperatorType.TYPE_NUMBER_ADD) 
+        .add_param(ContextType.TYPE_CLOCK)
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER) // 1: tx time > (time that payer confirmed + 24 hrs)
+        .add_param(ContextType.TYPE_CONSTANT, refund_goods_lost)
+        .add_query(MODULES.progress, 'Current Node', refund_progress_witness)
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
+        .add_logic(OperatorType.TYPE_LOGIC_OR)
+        .add_param(ValueType.TYPE_ADDRESS, machine) 
+        .add_query(MODULES.progress, 'Machine', refund_progress_witness) 
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
+    Guard.launch(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build());
+}
+*/
 const reward = async (protocol:Protocol, param:any) => {
 
 }
