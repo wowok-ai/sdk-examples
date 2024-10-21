@@ -26,6 +26,7 @@ const main = async () => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_receipt], TEST_PRIV(), ids), ids); // guard 0
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); // guard 1
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids); // guard 2
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_lost_comfirm_compensate], TEST_PRIV(), ids), ids); // guard 3
     console.log('guard id: ' + ids.get('guard::Guard'));  
 
     // publish machine
@@ -126,7 +127,7 @@ const goods_lost:Machine_Node = {
     pairs: [
         {prior_node: 'Order completed', threshold:10, forwards:[
             {name:'Payer confirmation', weight: 5, namedOperator:Machine.OPERATOR_ORDER_PAYER},
-            {name:'Express confirmation', weight: 5, permission:BUSINESS.express},
+            /*{name:'Express confirmation', weight: 5, permission:BUSINESS.express},*/
         ]},
         {prior_node: 'Goods shipped out', threshold:0, forwards:[
             {name:'Express confirmation', weight: 1, permission:BUSINESS.express},
@@ -172,9 +173,12 @@ const machine_publish = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     const permission = param.get('permission::Permission')[0] ;
     const guard_15days = param.get('guard::Guard')[0];
+    const guard_reaction_24hrs = param.get('guard::Guard')[3];
     const m = Machine.From(protocol.CurrentSession(), permission, machine);
     const shipper_with_guard:Machine_Forward = {name:'Shipper comfirms after 15 days', weight: 5, permission:BUSINESS.shipping, guard:guard_15days};
     m.add_forward(goods_shippedout.name, order_completed.name, shipper_with_guard);
+    const lost_with_guard:Machine_Forward = {name:'Response within 24 hours if package is lost', weight: 5, permission:BUSINESS.express, guard:guard_reaction_24hrs};
+    m.add_forward(order_completed.name, goods_lost.name, lost_with_guard);
     m.publish();
 }
 
@@ -299,7 +303,7 @@ const guard_refund = async (protocol:Protocol, param:any) => {
         .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
     Guard.launch(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build());
 }
-/*
+
 const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     const maker = new GuardMaker();
@@ -307,26 +311,46 @@ const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
     const completed_name = maker.add_constant(ValueType.TYPE_STRING, order_completed.name);
     const lost_name = maker.add_constant(ValueType.TYPE_STRING, goods_lost.name);
     const payer_forward_name = maker.add_constant(ValueType.TYPE_STRING, 'Payer confirmation');
+    const payment = maker.add_constant(ValueType.TYPE_ADDRESS);
+    const order = maker.add_constant(ValueType.TYPE_ADDRESS)
     maker.add_param(ContextType.TYPE_CONSTANT, payer_forward_name)
         .add_param(ContextType.TYPE_CONSTANT, lost_name)
         .add_param(ContextType.TYPE_CONSTANT, completed_name)
         .add_query(MODULES.progress, 'Closest Forward time', progress) // time that payer confirmed
-        .add_param(ContextType.TYPE_CLOCK)
         .add_param(ValueType.TYPE_U64, 86400000) // 24 hours
         .add_logic(OperatorType.TYPE_NUMBER_ADD) 
         .add_param(ContextType.TYPE_CLOCK)
         .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER) // 1: tx time > (time that payer confirmed + 24 hrs)
-        .add_param(ContextType.TYPE_CONSTANT, refund_goods_lost)
-        .add_query(MODULES.progress, 'Current Node', refund_progress_witness)
+        .add_query(MODULES.order, 'Progress', order)
+        .add_param(ContextType.TYPE_CONSTANT, progress)
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 2: ralationship: order's progress
+        .add_query(MODULES.payment, 'Guard for Perpose', payment)
+        .add_param(ContextType.TYPE_GUARD)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
-        .add_logic(OperatorType.TYPE_LOGIC_OR)
-        .add_param(ValueType.TYPE_ADDRESS, machine) 
-        .add_query(MODULES.progress, 'Machine', refund_progress_witness) 
-        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
-        .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
-    Guard.launch(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build());
+        .add_query(MODULES.payment, 'Index', payment)
+        .add_query(MODULES.progress, 'Current Session-id', progress)
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
+        .add_query(MODULES.order, 'Payer', order)
+        .add_query(MODULES.payment, 'Amount for a Recipient', payment)
+        .add_param(ValueType.TYPE_U64, 100000000)
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_LESSER_EQUAL) 
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 3)  // 3: payment: for this guard usage && progress session id matchs && compensation > 100000000
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 3)  // 4: 1 && 2 && 3
+        .add_param(ContextType.TYPE_CONSTANT, payer_forward_name)
+        .add_param(ContextType.TYPE_CONSTANT, lost_name)
+        .add_param(ContextType.TYPE_CONSTANT, completed_name)
+        .add_query(MODULES.progress, 'Closest Forward time', progress) // time that payer confirmed
+        .add_param(ValueType.TYPE_U64, 86400000) // 24 hours
+        .add_logic(OperatorType.TYPE_NUMBER_ADD) 
+        .add_param(ContextType.TYPE_CLOCK)
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_LESSER_EQUAL) // 5: tx time < (time that payer confirmed + 24 hrs) : No compensation required
+        .add_logic(OperatorType.TYPE_LOGIC_OR, 2); // 6: 4 || 5
+    var desp = order_completed.name+'->'+goods_lost.name+':\n';
+    desp += '1: Compensation 0.1 SUI for express response exceeding 24 hours;\n';
+    desp += '2: If the status is resolved within 24 hours, no compensation will be required.';
+    Guard.launch(protocol.CurrentSession(), desp, maker.build());
 }
-*/
+
 const reward = async (protocol:Protocol, param:any) => {
 
 }
