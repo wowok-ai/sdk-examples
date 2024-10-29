@@ -11,7 +11,6 @@ import { test_service_launch, test_service_order, test_service_withdraw } from '
 import { test_reward_claim, test_reward_launch } from './reward_test';
 import { test_demand_launch, test_demand_yes } from './demand_test';
 import { create_my_resource, manage_my_resource, like, avatar, transfer_resource,  destroy_resource } from './personal_test'
-import { test_treasury_launch } from './treasury_test';
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
@@ -75,10 +74,8 @@ const test_exes = async (protocol:Protocol) => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
     console.log('permission id: ' + ids.get('permission::Permission'));  await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_treasury_launch], TEST_PRIV(), ids), ids);
-    console.log('treasury id: ' + ids.get('treasury::Treasury')); 
     // object random sequence by rpc-get-objects !!  
-/*    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_guard_true], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_guard_true], TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_constant_launch_creator_equal], TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));
@@ -117,7 +114,7 @@ const test_exes = async (protocol:Protocol) => {
     console.log('reward id: ' + ids.get('reward::Reward'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_reward_claim], TEST_PRIV(), ids), ids);
-    */
+    
     console.log(ids)
 }
 

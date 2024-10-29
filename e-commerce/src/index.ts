@@ -16,16 +16,16 @@ const main = async () => {
     
     // permission
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([permission], TEST_PRIV(), ids), ids);
-    console.log('permission id: ' + ids.get('permission::Permission'));  
+    console.log('permission id: ' + ids.get('permission::Permission'));  await sleep(2000)
    
     // machine
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([machine], TEST_PRIV(), ids), ids);
+    await machine(protocol, ids);
     console.log('machine id: ' + ids.get('machine::Machine')); 
     
     // guard
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_receipt], TEST_PRIV(), ids), ids); // guard 0
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); // guard 1
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids); // guard 2
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_receipt], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); await sleep(2000); // guard 1
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_lost_comfirm_compensate], TEST_PRIV(), ids), ids); // guard 3
     console.log('guard id: ' + ids.get('guard::Guard'));  
 
@@ -162,11 +162,28 @@ const no_compensation:Machine_Node = {
     ]
 }
 
-const machine = async (protocol:Protocol, param:any) => {
-    const permission = param.get('permission::Permission')[0] ;
-    const m = Machine.New(protocol.CurrentSession(), permission, 'E-commerce Machine', 'https://wowok.net/');
-    m.add_node([order_confirmation, order_cancellation, order_completed, goods_lost, compensation, dispute, goods_shippedout, no_compensation]);
-    m.launch();
+// Chain transaction size limit, split into small transactions
+const machine = async (protocol:Protocol, ids: Map<string, TxbObject[]>) => {
+    const create = (protocol:Protocol, param:any) => {
+        const permission = ids.get('permission::Permission')![0] ;
+        const m = Machine.New(protocol.CurrentSession(), permission, 'E-commerce Machine', 'https://wowok.net/');
+        m.launch();
+    }
+    const add1 = (protocol:Protocol, param:any) => {
+        const machine = param.get('machine::Machine')[0] ;
+        const permission = ids.get('permission::Permission')![0] ;
+        const m = Machine.From(protocol.CurrentSession(), permission, machine);
+        m.add_node([order_confirmation, order_cancellation, order_completed, goods_shippedout]);
+    }
+    const add2 = (protocol:Protocol, param:any) => {
+        const machine = param.get('machine::Machine')[0] ;
+        const permission = ids.get('permission::Permission')![0] ;
+        const m = Machine.From(protocol.CurrentSession(), permission, machine);
+        m.add_node([goods_lost, compensation, dispute, no_compensation]);
+    }
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([create], TEST_PRIV(), ids), ids); await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([add1], TEST_PRIV(), ids), ids); await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([add2], TEST_PRIV(), ids), ids); await sleep(2000);
 }
 
 const machine_publish = async (protocol:Protocol, param:any) => {
