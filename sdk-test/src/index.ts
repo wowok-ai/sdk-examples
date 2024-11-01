@@ -1,5 +1,5 @@
 
-import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok} from 'wowok';
+import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok, } from 'wowok';
 import { TEST_PRIV, TEST_ADDR } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission_test'
 import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_signer, test_guard_launch_substring,
@@ -8,7 +8,7 @@ import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_
 import { test_repository_launch, test_repository_policy } from './repository_test'
 import { test_machine_edit_nodes, test_machine_launch, test_machine_progress, test_progress_run1, test_progress_run2 } from './machine_test';
 import { test_service_launch, test_service_order, test_service_withdraw } from './service_test';
-import { test_reward_claim, test_reward_launch } from './reward_test';
+import { test_withholding_claim, test_withholding_launch } from './withholding_test';
 import { test_demand_launch, test_demand_yes } from './demand_test';
 import { create_my_resource, manage_my_resource, like, avatar, transfer_resource,  destroy_resource } from './personal_test'
 
@@ -76,24 +76,24 @@ const test_exes = async (protocol:Protocol) => {
     console.log('permission id: ' + ids.get('permission::Permission'));  await sleep(2000);
     // object random sequence by rpc-get-objects !!  
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_guard_true], TEST_PRIV(), ids), ids);
-    console.log('guard id: ' + ids.get('guard::Guard'));
+    console.log('guard id: ' + ids.get('guard::Guard'));  await sleep(2000);
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_constant_launch_creator_equal], TEST_PRIV(), ids), ids);
-    console.log('guard id: ' + ids.get('guard::Guard'));
+    console.log('guard id: ' + ids.get('guard::Guard'));  await sleep(2000);
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_guard_launch_creator_equal], 
         TEST_PRIV(), ids), ids);
-    console.log('guard id: ' + ids.get('guard::Guard'));
+    console.log('guard id: ' + ids.get('guard::Guard'));  await sleep(2000);
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_permission_set_guard, test_guard_launch_number, test_guard_launch_permission_builder], TEST_PRIV(), ids), ids);    
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_repository_launch], TEST_PRIV(), ids), ids); 
+        [test_permission_set_guard, test_guard_launch_number, test_guard_launch_permission_builder], TEST_PRIV(), ids), ids);     await sleep(2000); 
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_repository_launch], TEST_PRIV(), ids), ids);  await sleep(2000);
     console.log('repository id: ' + ids.get('repository::Repository'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_repository_policy], TEST_PRIV(), ids), ids);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_machine_launch], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_repository_policy], TEST_PRIV(), ids), ids);  await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_machine_launch], TEST_PRIV(), ids), ids);  await sleep(2000);
     console.log('machine id: ' + ids.get('machine::Machine'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_machine_edit_nodes, test_machine_progress], TEST_PRIV(), ids), ids);
-    console.log('progress id: ' + ids.get('progress::Progress'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_machine_progress], TEST_PRIV(), ids), ids);
+    console.log('progress id: ' + ids.get('progress::Progress'));  await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_machine_progress], TEST_PRIV(), ids), ids);  await sleep(2000);
     console.log('progress id: ' + ids.get('progress::Progress'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run1], TEST_PRIV(), ids));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run2], TEST_PRIV(), ids));
@@ -110,10 +110,10 @@ const test_exes = async (protocol:Protocol) => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_demand_yes], TEST_PRIV(), ids), ids);
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_reward_launch], TEST_PRIV(), ids), ids); 
-    console.log('reward id: ' + ids.get('reward::Reward'));
+        [test_withholding_launch], TEST_PRIV(), ids), ids); 
+    console.log('withholding id: ' + ids.get('withholding::Withholding'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_reward_claim], TEST_PRIV(), ids), ids);
+        [test_withholding_claim], TEST_PRIV(), ids), ids);
     
     console.log(ids)
 }
