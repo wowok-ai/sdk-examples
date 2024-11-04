@@ -344,7 +344,7 @@ const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
         .add_query(MODULES.payment, 'Guard for Perpose', payment)
         .add_param(ContextType.TYPE_GUARD)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
-        .add_query(MODULES.payment, 'Index', payment)
+        .add_query(MODULES.payment, 'Biz-ID', payment)
         .add_query(MODULES.progress, 'Current Session-id', progress)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
         .add_query(MODULES.order, 'Payer', order)
