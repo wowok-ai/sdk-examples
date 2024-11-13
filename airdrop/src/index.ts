@@ -56,7 +56,7 @@ const treasury_set = async (protocol:Protocol, param:any) => {
         tr.add_withdraw_guard(v, BigInt(100*(index+1)));
     });
     tr.set_withdraw_mode(WithdrawMode.GUARD_ONLY_AND_IMMUTABLE);
-    var desp = 'airdrop treasury that three guards to claim:\n';
+    var desp = 'This airdrop treasury adds three withdrawal guards to define claiming operation criteria:\n';
     desp += 'Guard 1. Freshman who have never claimed can claim 300 at a time; \n';
     desp += 'Guard 2. Everyone can claim 100 for every more than 1 day; \n';
     desp += 'Guard 3. Everyone can claim 200 for every more than 1 day, if claimed already more than 10 times.'
@@ -66,7 +66,7 @@ const treasury_set = async (protocol:Protocol, param:any) => {
 const freshman_guard = async (protocol:Protocol, param:any) => {
     const treasury = param.get('treasury::Treasury')[0] ;
     const maker = new GuardMaker();
-    maker.add_param(ValueType.TYPE_ADDRESS, TEST_ADDR())
+    maker.add_param(ContextType.TYPE_SIGNER)
         .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
         .add_query(MODULES.treasury, 'Has Operation with Sgr', treasury)
         .add_logic(OperatorType.TYPE_LOGIC_NOT); // !withdraw ? for TEST_ADDR
@@ -76,7 +76,7 @@ const freshman_guard = async (protocol:Protocol, param:any) => {
 const day_guard = async (protocol:Protocol, param:any) => {
     const treasury = param.get('treasury::Treasury')[0] ;
     const maker = new GuardMaker();
-    maker.add_param(ValueType.TYPE_ADDRESS, TEST_ADDR())
+    maker.add_param(ContextType.TYPE_SIGNER)
         .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
         .add_query(MODULES.treasury, 'Recent Time with Op/Sgr', treasury) 
         .add_param(ValueType.TYPE_U64, 86400000) // 1 DAY
@@ -90,15 +90,14 @@ const day_guard = async (protocol:Protocol, param:any) => {
 const frequency_guard = async (protocol:Protocol, param:any) => {
     const treasury = param.get('treasury::Treasury')[0] ;
     const maker = new GuardMaker();
-    const signer = maker.add_constant(ValueType.TYPE_ADDRESS, TEST_ADDR());
     const tr = maker.add_constant(ValueType.TYPE_ADDRESS, treasury);
 
     maker.add_param(ValueType.TYPE_U8, 10)
-        .add_param(ContextType.TYPE_CONSTANT, signer)
+        .add_param(ContextType.TYPE_SIGNER)
         .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
         .add_query(MODULES.treasury, 'Operation at Least Times by a Signer', tr) 
 
-        .add_param(ContextType.TYPE_CONSTANT, signer)
+        .add_param(ContextType.TYPE_SIGNER)
         .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
         .add_query(MODULES.treasury, 'Recent Time with Op/Sgr', tr) 
         .add_param(ValueType.TYPE_U64, 86400000) // 1 DAY
