@@ -70,7 +70,7 @@ const freshman_guard = async (protocol:Protocol, param:any) => {
         .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
         .add_query(MODULES.treasury, 'Has Operation with Sgr', treasury)
         .add_logic(OperatorType.TYPE_LOGIC_NOT); // !withdraw ? for TEST_ADDR
-    Guard.launch(protocol.CurrentSession(), 'Was it an address that never picked up this airdrop?', maker.build())
+    Guard.New(protocol.CurrentSession(), 'Was it an address that never picked up this airdrop?', maker.build()).launch();
 }
 
 const day_guard = async (protocol:Protocol, param:any) => {
@@ -83,7 +83,7 @@ const day_guard = async (protocol:Protocol, param:any) => {
         .add_logic(OperatorType.TYPE_NUMBER_ADD) // +
         .add_param(ContextType.TYPE_CLOCK) // current tx time
         .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER_EQUAL); // current tx time >= (last withdraw time + 1 day)
-    Guard.launch(protocol.CurrentSession(), 'Has the airdrop been claimed for more than 1 day?', maker.build())
+    Guard.New(protocol.CurrentSession(), 'Has the airdrop been claimed for more than 1 day?', maker.build()).launch()
 }
 
 
@@ -106,7 +106,7 @@ const frequency_guard = async (protocol:Protocol, param:any) => {
         .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER_EQUAL) // current tx time >= (last withdraw time + 1 day)
 
         .add_logic(OperatorType.TYPE_LOGIC_AND)
-    Guard.launch(protocol.CurrentSession(), 'Has an address claimed 10 airdrops and has not claimed an airdrop for more than a day?', maker.build())
+    Guard.New(protocol.CurrentSession(), 'Has an address claimed 10 airdrops and has not claimed an airdrop for more than a day?', maker.build()).launch()
 }
 
 
