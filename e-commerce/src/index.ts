@@ -23,9 +23,11 @@ const main = async () => {
     console.log('machine id: ' + ids.get('machine::Machine')); 
     
     // guard
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_confirmation_24hrs_more], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_receipt], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); await sleep(2000); // guard 1
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_payer_lost], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_lost_comfirm_compensate], TEST_PRIV(), ids), ids); // guard 3
     console.log('guard id: ' + ids.get('guard::Guard'));  
 
@@ -58,6 +60,7 @@ enum BUSINESS { // business permission for Permission Object must >= 1000
     shipping = 1001,
     express = 1002,
     finance = 1003,
+    dispute = 1004,
 };
 
 
@@ -69,6 +72,7 @@ const permission = async (protocol:Protocol, param:any) => {
         {entity_address: TESTOR[3].address, permissions: [ {index:BUSINESS.express}, ],},
         {entity_address: TESTOR[4].address, permissions: [ {index:BUSINESS.express}, ],},
         {entity_address: TESTOR[5].address, permissions: [ {index:BUSINESS.finance},],},
+        {entity_address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute},],},
     ]
 
     const p = Permission.New(protocol.CurrentSession(), 'permission test');
@@ -119,45 +123,31 @@ const order_completed:Machine_Node = {
             {name:'Expdress comfirms', weight: 5, permission:BUSINESS.express},
             {name:'Shipper comfirms after 15 days', weight: 5, permission:BUSINESS.shipping},
         ]},
+        {prior_node: 'Dispute', threshold:10, forwards:[
+            {name:'Payer comfirms', weight: 6, namedOperator:Machine.OPERATOR_ORDER_PAYER},
+            {name:'Expdress comfirms', weight: 4, permission:BUSINESS.express},
+            {name:'Seller comfirms', weight: 4, permission:BUSINESS.dispute},
+        ]},
     ]
 }
 
 const goods_lost:Machine_Node = {
     name: 'Goods lost',
     pairs: [
-        {prior_node: 'Order completed', threshold:10, forwards:[
-            {name:'Payer confirmation', weight: 5, namedOperator:Machine.OPERATOR_ORDER_PAYER},
-            /*{name:'Express confirmation', weight: 5, permission:BUSINESS.express},*/
+        {prior_node: 'Dispute', threshold:10, forwards:[
+            {name:'Seller comfirms', weight: 5, permission:BUSINESS.shipping},
         ]},
-        {prior_node: 'Goods shipped out', threshold:0, forwards:[
-            {name:'Express confirmation', weight: 1, permission:BUSINESS.express},
+        {prior_node: 'Goods shipped out', threshold:10, forwards:[
+            {name:'Express comfirms', weight: 5, permission:BUSINESS.express},
+            {name:'Seller comfirms', weight: 5, permission:BUSINESS.shipping},
         ]},
     ]
 }
+
 const dispute:Machine_Node = {
     name: 'Dispute',
     pairs: [
         {prior_node: 'Order completed', threshold:0, forwards:[
-            {name:'Payer submits', weight: 1, namedOperator:Machine.OPERATOR_ORDER_PAYER},
-        ]},
-    ]
-}
-
-const compensation:Machine_Node = {
-    name: 'Compensation',
-    pairs: [
-        {prior_node: 'Dispute', threshold:0, forwards:[
-            {name:'Confirm compensation', weight: 1, permission: BUSINESS.finance},
-        ]},
-    ]
-}
-
-const no_compensation:Machine_Node = {
-    name: 'No compensation',
-    pairs: [
-        {prior_node: 'Dispute', threshold:10, forwards:[
-            {name:'Payer comfirms', weight: 5, namedOperator:Machine.OPERATOR_ORDER_PAYER},
-            {name:'Seller comfirms', weight: 5, permission:BUSINESS.shipping},
         ]},
     ]
 }
@@ -169,33 +159,21 @@ const machine = async (protocol:Protocol, ids: Map<string, TxbObject[]>) => {
         const m = Machine.New(protocol.CurrentSession(), permission, 'E-commerce Machine', 'https://wowok.net/');
         m.launch();
     }
-    const add1 = (protocol:Protocol, param:any) => {
+    const add = (protocol:Protocol, param:any) => {
         const machine = param.get('machine::Machine')[0] ;
         const permission = ids.get('permission::Permission')![0] ;
         const m = Machine.From(protocol.CurrentSession(), permission, machine);
-        m.add_node([order_confirmation, order_cancellation, order_completed, goods_shippedout]);
+        m.add_node([order_confirmation, order_cancellation, order_completed, goods_shippedout, goods_lost, dispute]);
     }
-    const add2 = (protocol:Protocol, param:any) => {
-        const machine = param.get('machine::Machine')[0] ;
-        const permission = ids.get('permission::Permission')![0] ;
-        const m = Machine.From(protocol.CurrentSession(), permission, machine);
-        m.add_node([goods_lost, compensation, dispute, no_compensation]);
-    }
+
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([create], TEST_PRIV(), ids), ids); await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([add1], TEST_PRIV(), ids), ids); await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([add2], TEST_PRIV(), ids), ids); await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([add], TEST_PRIV(), ids), ids); await sleep(2000);
 }
 
 const machine_publish = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     const permission = param.get('permission::Permission')[0] ;
-    const guard_15days = param.get('guard::Guard')[0];
-    const guard_reaction_24hrs = param.get('guard::Guard')[3];
     const m = Machine.From(protocol.CurrentSession(), permission, machine);
-    const shipper_with_guard:Machine_Forward = {name:'Shipper comfirms after 15 days', weight: 5, permission:BUSINESS.shipping, guard:guard_15days};
-    m.add_forward(goods_shippedout.name, order_completed.name, shipper_with_guard);
-    const lost_with_guard:Machine_Forward = {name:'Response within 24 hours if package is lost', weight: 5, permission:BUSINESS.express, guard:guard_reaction_24hrs};
-    m.add_forward(order_completed.name, goods_lost.name, lost_with_guard);
     m.publish();
 }
 
@@ -259,6 +237,31 @@ const service = async (protocol:Protocol, param:any) => {
     service.launch();
 }
 
+const guard_confirmation_24hrs_more = async (protocol:Protocol, param:any) => {
+    const machine = param.get('machine::Machine')[0] ;
+    // Receipt will be signed by default 15 days after delivery
+    const receipt = new GuardMaker();
+    const receipt_progress_witness = receipt.add_constant(ValueType.TYPE_ADDRESS); // witness of Progress
+    receipt.add_param(ValueType.TYPE_U64, 86400000) // 24 hours
+        .add_query(MODULES.progress, 'Last Session Time', receipt_progress_witness)
+        .add_logic(OperatorType.TYPE_NUMBER_ADD) // +
+        .add_param(ContextType.TYPE_CLOCK) // current tx time
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER_EQUAL) // 1: current tx time >= (last session time + 24hrs)
+        .add_param(ValueType.TYPE_STRING, order_confirmation.name)
+        .add_query(MODULES.progress, 'Current Node', receipt_progress_witness)
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 2: current node equals order_confirmation
+        .add_param(ValueType.TYPE_ADDRESS, machine) 
+        .add_query(MODULES.progress, 'Machine', receipt_progress_witness) 
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 3: progress'machine equals this machine
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 3); // 1 and 2 and 3
+    const guard = Guard.New(protocol.CurrentSession(), 'current on node '+order_confirmation.name+ ' and current tx time >= (last session time + 24hrs)', receipt.build());
+    const permission = param.get('permission::Permission')[0] ;
+    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const cancel:Machine_Forward = {name:'Goods not shipped for more than 24 hours', weight: 1, namedOperator:Machine.OPERATOR_ORDER_PAYER, guard:guard.get_object()};
+    m.add_forward(order_confirmation.name, order_cancellation.name, cancel); 
+    guard.launch()
+}
+
 const guard_receipt = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     // Receipt will be signed by default 15 days after delivery
@@ -276,7 +279,12 @@ const guard_receipt = async (protocol:Protocol, param:any) => {
         .add_query(MODULES.progress, 'Machine', receipt_progress_witness) 
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 3: progress'machine equals this machine
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3); // 1 and 2 and 3
-    Guard.launch(protocol.CurrentSession(), 'current on node '+goods_shippedout.name+ ' and current tx time >= (last session time + 15 days)', receipt.build());
+    const guard = Guard.New(protocol.CurrentSession(), 'current on node '+goods_shippedout.name+ ' and current tx time >= (last session time + 15 days)', receipt.build());
+    const permission = param.get('permission::Permission')[0] ;
+    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const shipper_with_guard:Machine_Forward = {name:'Shipper comfirms after 15 days', weight: 5, permission:BUSINESS.shipping, guard:guard.get_object()};
+    m.add_forward(goods_shippedout.name, order_completed.name, shipper_with_guard);
+    guard.launch()
 }
 
 const guard_withdraw = async (protocol:Protocol, param:any) => {
@@ -285,19 +293,45 @@ const guard_withdraw = async (protocol:Protocol, param:any) => {
     const withdraw = new GuardMaker();
     const withdraw_progress_witness = withdraw.add_constant(ValueType.TYPE_ADDRESS);
     const withdraw_completed = withdraw.add_constant(ValueType.TYPE_STRING, order_completed.name);
-    const withdraw_dispute = withdraw.add_constant(ValueType.TYPE_STRING, dispute.name);
     withdraw.add_param(ContextType.TYPE_CONSTANT, withdraw_completed)
         .add_query(MODULES.progress, 'Current Node', withdraw_progress_witness)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
-        .add_param(ContextType.TYPE_CONSTANT, withdraw_dispute)
-        .add_query(MODULES.progress, 'Current Node', withdraw_progress_witness)
-        .add_logic(OperatorType.TYPE_LOGIC_EQUAL)
-        .add_logic(OperatorType.TYPE_LOGIC_OR)
         .add_param(ValueType.TYPE_ADDRESS, machine) 
         .add_query(MODULES.progress, 'Machine', withdraw_progress_witness) 
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
-        .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
-    Guard.launch(protocol.CurrentSession(), 'Widthdraw Guard for Machine nodes', withdraw.build());
+        .add_param(ValueType.TYPE_U64, 1296000000) // 15 days
+        .add_query(MODULES.progress, 'Last Session Time', withdraw_progress_witness)
+        .add_logic(OperatorType.TYPE_NUMBER_ADD) // +
+        .add_param(ContextType.TYPE_CLOCK) // current tx time
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER_EQUAL) // 1: current tx time >= (last session time + 15 days)
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 3); 
+    var desp = 'Widthdraw on status: '+order_completed+'; and the dispute submission deadline of 15 days is exceeded\n';
+    Guard.New(protocol.CurrentSession(), desp, withdraw.build()).launch();
+}
+
+const guard_payer_lost = async (protocol:Protocol, param:any) => {
+    const machine = param.get('machine::Machine')[0] ;
+    // Receipt will be signed by default 15 days after delivery
+    const maker = new GuardMaker();
+    const progress = maker.add_constant(ValueType.TYPE_ADDRESS); // witness of Progress
+    maker.add_param(ValueType.TYPE_U64, 1296000000) // 15 days
+        .add_query(MODULES.progress, 'Last Session Time', progress)
+        .add_logic(OperatorType.TYPE_NUMBER_ADD) // +
+        .add_param(ContextType.TYPE_CLOCK) // current tx time
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_LESSER_EQUAL) // 1: current tx time <= (last session time + 15 days)
+        .add_param(ValueType.TYPE_STRING, order_completed.name)
+        .add_query(MODULES.progress, 'Current Node', progress)
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 2: current node equals order_completed
+        .add_param(ValueType.TYPE_ADDRESS, machine) 
+        .add_query(MODULES.progress, 'Machine', progress) 
+        .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 3: progress'machine equals this machine
+        .add_logic(OperatorType.TYPE_LOGIC_AND, 3); // 1 and 2 and 3
+    const guard = Guard.New(protocol.CurrentSession(), 'current on node '+order_completed.name+ ' and current tx time <= (last session time + 15 days)', maker.build());
+    const permission = param.get('permission::Permission')[0] ;
+    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const f:Machine_Forward = {name:'Confirm no package received within 15 days', weight: 1, namedOperator:Machine.OPERATOR_ORDER_PAYER, guard:guard.get_object()};
+    m.add_forward(order_completed.name, dispute.name, f); 
+    guard.launch()
 }
 
 const guard_refund = async (protocol:Protocol, param:any) => {
@@ -318,7 +352,7 @@ const guard_refund = async (protocol:Protocol, param:any) => {
         .add_query(MODULES.progress, 'Machine', refund_progress_witness) 
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
         .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
-    Guard.launch(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build());
+    Guard.New(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build()).launch();
 }
 
 const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
@@ -330,14 +364,11 @@ const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
     const payer_forward_name = maker.add_constant(ValueType.TYPE_STRING, 'Payer confirmation');
     const payment = maker.add_constant(ValueType.TYPE_ADDRESS);
     const order = maker.add_constant(ValueType.TYPE_ADDRESS)
-    maker.add_param(ContextType.TYPE_CONSTANT, payer_forward_name)
-        .add_param(ContextType.TYPE_CONSTANT, lost_name)
-        .add_param(ContextType.TYPE_CONSTANT, completed_name)
-        .add_query(MODULES.progress, 'Closest Forward time', progress) // time that payer confirmed
+    maker.add_query(MODULES.progress, 'Last Session Time', progress)
         .add_param(ValueType.TYPE_U64, 86400000) // 24 hours
         .add_logic(OperatorType.TYPE_NUMBER_ADD) 
         .add_param(ContextType.TYPE_CLOCK)
-        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER) // 1: tx time > (time that payer confirmed + 24 hrs)
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER) // 1: tx time > (last session time  + 24 hrs)
         .add_query(MODULES.order, 'Progress', order)
         .add_param(ContextType.TYPE_CONSTANT, progress)
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 2: ralationship: order's progress
@@ -353,19 +384,21 @@ const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
         .add_logic(OperatorType.TYPE_LOGIC_AS_U256_LESSER_EQUAL) 
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3)  // 3: payment: for this guard usage && progress session id matchs && compensation > 100000000
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3)  // 4: 1 && 2 && 3
-        .add_param(ContextType.TYPE_CONSTANT, payer_forward_name)
-        .add_param(ContextType.TYPE_CONSTANT, lost_name)
-        .add_param(ContextType.TYPE_CONSTANT, completed_name)
-        .add_query(MODULES.progress, 'Closest Forward time', progress) // time that payer confirmed
+        .add_query(MODULES.progress, 'Last Session Time', progress)
         .add_param(ValueType.TYPE_U64, 86400000) // 24 hours
         .add_logic(OperatorType.TYPE_NUMBER_ADD) 
         .add_param(ContextType.TYPE_CLOCK)
-        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_LESSER_EQUAL) // 5: tx time < (time that payer confirmed + 24 hrs) : No compensation required
+        .add_logic(OperatorType.TYPE_LOGIC_AS_U256_LESSER_EQUAL) // 5: tx time <= (last session time  + 24 hrs) : No compensation required
         .add_logic(OperatorType.TYPE_LOGIC_OR, 2); // 6: 4 || 5
     var desp = order_completed.name+'->'+goods_lost.name+':\n';
-    desp += '1: Compensation 0.1 SUI for express response exceeding 24 hours;\n';
+    desp += '1: Compensation 100000000 to order payer for responsing exceeding 24 hours;\n';
     desp += '2: If the status is resolved within 24 hours, no compensation will be required.';
-    Guard.launch(protocol.CurrentSession(), desp, maker.build());
+    const guard = Guard.New(protocol.CurrentSession(), desp, maker.build());
+    const permission = param.get('permission::Permission')[0] ;
+    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const express:Machine_Forward = {name:'Response within 24hrs if package lost', weight: 5, permission:BUSINESS.express, guard:guard.get_object()};
+    m.add_forward(dispute.name, goods_lost.name, express);
+    guard.launch()
 }
 
 const reward = async (protocol:Protocol, param:any) => {
