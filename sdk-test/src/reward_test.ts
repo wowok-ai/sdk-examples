@@ -1,5 +1,7 @@
+/*****************
+ * depreacted
+******************/
 import { Protocol, PassportObject, RewardGuardPortions, Reward, Passport, GuardParser} from 'wowok';
-
 export const test_reward_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
     let reward = Reward.New(protocol.CurrentSession(), Protocol.SUI_COIN_TYPE, permission_id, 'reward hhh', true, 10000000000);

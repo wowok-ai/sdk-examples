@@ -8,7 +8,6 @@ import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_
 import { test_repository_launch, test_repository_policy } from './repository_test'
 import { test_machine_edit_nodes, test_machine_launch, test_machine_progress, test_progress_run1, test_progress_run2 } from './machine_test';
 import { test_service_launch, test_service_order, test_service_withdraw } from './service_test';
-import { test_reward_claim, test_reward_launch } from './reward_test';
 import { test_demand_launch, test_demand_yes } from './demand_test';
 import { create_my_resource, manage_my_resource, like, avatar, transfer_resource,  destroy_resource } from './personal_test'
 
@@ -109,11 +108,6 @@ const test_exes = async (protocol:Protocol) => {
     console.log('demand id: ' + ids.get('demand::Demand'));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_demand_yes], TEST_PRIV(), ids), ids);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_reward_launch], TEST_PRIV(), ids), ids); 
-    console.log('reward id: ' + ids.get('reward::Reward'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_reward_claim], TEST_PRIV(), ids), ids);
     
     console.log(ids)
 }
