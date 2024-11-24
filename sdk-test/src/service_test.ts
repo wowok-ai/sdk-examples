@@ -1,6 +1,6 @@
  //@ts-ignore 
 import { Protocol, Service_Discount_Type, Service_Buy, Service_Sale, Service, MachineObject, PermissionObject,
-    DicountDispatch, TxbObject} from 'wowok';
+    DicountDispatch, TxbObject, Treasury} from 'wowok';
 import { TEST_ADDR } from './common'
 
 
@@ -57,7 +57,9 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
         return ;
     }
 
-    let service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'cup service', TEST_ADDR(), 'https://wwk.io/') ;
+    const t = Treasury.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Order revenue Treasury');
+    
+    let service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'cup service', t.get_object()) ;
     service.set_machine(machine);
     service.add_sales([service_sales1, service_sales2]);
     service.add_stock(service_sales1.item, BigInt(10000)); // increase stock
@@ -65,6 +67,7 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
     service.discount_transfer([discount1, discount2]);
     service.publish(); 
     service.launch();
+    t.launch();
 }
 
 export const test_service_order = async(protocol:Protocol, param:any) => {
@@ -82,12 +85,12 @@ export const test_service_order = async(protocol:Protocol, param:any) => {
 
 export const test_service_withdraw = async(protocol:Protocol, param:any) => {
     console.log(param)
-    let permission = param.get('permission::Permission')[0] ;
+/*   let permission = param.get('permission::Permission')[0] ;
     let s = param.get('service::Service')[0] ;
     let orders = param.get('order::Order') as TxbObject[];
     let service = Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, s);
 
     orders.forEach((o) => {
-        service.withdraw(o);
-    })
+        service.withdraw(o, );
+    }) */
 }

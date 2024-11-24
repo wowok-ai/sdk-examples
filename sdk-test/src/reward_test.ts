@@ -1,6 +1,7 @@
 /*****************
  * depreacted
 ******************/
+/*
 import { Protocol, PassportObject, RewardGuardPortions, Reward, Passport, GuardParser} from 'wowok';
 export const test_reward_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
@@ -46,4 +47,4 @@ export const test_reward_claim = async (protocol:Protocol, param:any) => {
     let passport = new Passport(protocol.CurrentSession(), query, true); // use guard0 for passport
     reward.claim(passport.get_object());
     passport.freeze() // destory or freeze passport while used
-}
+} */
