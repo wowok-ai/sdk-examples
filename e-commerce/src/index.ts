@@ -5,10 +5,12 @@ import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok, M
     ContextType,
     ValueType,
     OperatorType,
-    Machine_Forward, 
+    Machine_Forward,
+    Treasury, 
 } from 'wowok';
 import { TEST_PRIV, TEST_ADDR, TESTOR } from './common'
 
+const SERVICE_PAY_TYPE = Protocol.SUI_TOKEN_TYPE; // token for pay
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
@@ -18,6 +20,10 @@ const main = async () => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([permission], TEST_PRIV(), ids), ids);
     console.log('permission id: ' + ids.get('permission::Permission'));  await sleep(2000)
    
+    // treasury
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([treasury], TEST_PRIV(), ids), ids);
+    console.log('treasury id: ' + ids.get('treasury::Treasury'));  await sleep(2000)
+
     // machine
     await machine(protocol, ids);
     console.log('machine id: ' + ids.get('machine::Machine')); 
@@ -25,8 +31,6 @@ const main = async () => {
     // guard
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_confirmation_24hrs_more], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_receipt], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); await sleep(2000); // guard 1
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_payer_lost], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_lost_comfirm_compensate], TEST_PRIV(), ids), ids); // guard 3
     console.log('guard id: ' + ids.get('guard::Guard'));  
@@ -38,7 +42,9 @@ const main = async () => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service], TEST_PRIV(), ids), ids);
     console.log('service id: ' + ids.get('service::Service'));  
 
-    // reward
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); await sleep(2000); // guard 1
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service_publish], TEST_PRIV(), ids), ids);
 
     // test service
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service_run], TEST_PRIV(), ids), ids);
@@ -47,6 +53,18 @@ const main = async () => {
 
 function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const treasury = async (protocol:Protocol, param:any) => {
+    const permission = param.get('permission::Permission')[0] ;
+    const t = Treasury.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Order revenue Treasury');
+    t.launch();
+}
+
+const service_publish = async (protocol:Protocol, param:any) => {
+    const permission = param.get('permission::Permission')[0] ;
+    const service = param.get('service::Service')[0];
+    Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, service).publish(); 
 }
 
 const service_run = async (protocol:Protocol, param:any) => {
@@ -178,7 +196,6 @@ const machine_publish = async (protocol:Protocol, param:any) => {
 }
 
 const service = async (protocol:Protocol, param:any) => {
-    const SERVICE_PAY_TYPE = Protocol.SUI_TOKEN_TYPE; // token for pay
     const sales:Service_Sale[] = [
         {item:'Play Purse for Little Girls, 35PCS Toddler Purse with Pretend Makeup for Toddlers, Princess Toys Includes Handbag, Phone, Wallet, Camera, Keys, Kids Purse Birthday Gift for Girls Age 3 4 5 6+', price: BigInt(3), stock: BigInt(10022), endpoint:'https://www.amazon.com/-/zh/dp/B0CC5HY7FW/?_encoding=UTF8&pd_rd_w=WCGMu&content-id=amzn1.sym.4b90c80a-3aee-44a3-b41d-fc2674a3ef63%3Aamzn1.symc.ee4c414f-039b-458d-a009-4479557ca47b&pf_rd_p=4b90c80a-3aee-44a3-b41d-fc2674a3ef63&pf_rd_r=8THXB3PK5QMJY69HTZBT&pd_rd_wg=GncEh&pd_rd_r=cabe72a9-3591-47f1-8cb1-fd10ec2d9db1&ref_=pd_hp_d_btf_ci_mcx_mr_hp_d'}, 
         {item:'Little Girls Purse with Accessories and Pretend Makeup for Toddlers - My First Purse Set Includes Handbag, Phone, Wallet, Play Makeup and More Pretend Play Toys for Girls Age 3 +, Great Gift for Girls', price: BigInt(5), stock: BigInt(10111), endpoint:'https://www.amazon.com/-/zh/dp/B0BJYRT9JL/?_encoding=UTF8&pd_rd_w=WCGMu&content-id=amzn1.sym.4b90c80a-3aee-44a3-b41d-fc2674a3ef63%3Aamzn1.symc.ee4c414f-039b-458d-a009-4479557ca47b&pf_rd_p=4b90c80a-3aee-44a3-b41d-fc2674a3ef63&pf_rd_r=8THXB3PK5QMJY69HTZBT&pd_rd_wg=GncEh&pd_rd_r=cabe72a9-3591-47f1-8cb1-fd10ec2d9db1&ref_=pd_hp_d_btf_ci_mcx_mr_hp_d&th=1'}, 
@@ -211,7 +228,8 @@ const service = async (protocol:Protocol, param:any) => {
 
     const permission = param.get('permission::Permission')[0] ;
     const machine = param.get('machine::Machine')[0] ;
-    if (!permission || !machine ) {
+    const treasury = param.get('treasury::Treasury')[0] ;
+    if (!permission || !machine || !treasury) {
         console.log('permission or machine invalid');
         return ;
     }
@@ -223,17 +241,10 @@ const service = async (protocol:Protocol, param:any) => {
         return ;
     }
 
-    let service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Top1 Toy Store in US.', TEST_ADDR()) ;
+    let service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Top1 Toy Store in US.', treasury) ;
     service.set_machine(machine);
     service.add_sales(sales);
     service.discount_transfer(discounts_dispatch);
-    service.add_refund_guards([
-        {guard:guard_refund, percent:100}
-    ]);
-    service.add_withdraw_guards([
-        {guard:guard_withdraw, percent:100}
-    ]);
-    service.publish(); 
     service.launch();
 }
 
@@ -305,8 +316,12 @@ const guard_withdraw = async (protocol:Protocol, param:any) => {
         .add_param(ContextType.TYPE_CLOCK) // current tx time
         .add_logic(OperatorType.TYPE_LOGIC_AS_U256_GREATER_EQUAL) // 1: current tx time >= (last session time + 15 days)
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3); 
-    var desp = 'Widthdraw on status: '+order_completed+'; and the dispute submission deadline of 15 days is exceeded\n';
-    Guard.New(protocol.CurrentSession(), desp, withdraw.build()).launch();
+    const permission = param.get('permission::Permission')[0] ;
+    const service = param.get('service::Service')[0] ;
+    var desp = 'Widthdraw on status: '+order_completed.name+'; and the dispute submission deadline of 15 days is exceeded\n; Service: '+service;
+    const guard = Guard.New(protocol.CurrentSession(), desp, withdraw.build());
+    Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, service).add_withdraw_guards([{guard:guard.get_object(), percent:100}]);
+    guard.launch();
 }
 
 const guard_payer_lost = async (protocol:Protocol, param:any) => {
@@ -352,16 +367,18 @@ const guard_refund = async (protocol:Protocol, param:any) => {
         .add_query(MODULES.progress, 'Machine', refund_progress_witness) 
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) 
         .add_logic(OperatorType.TYPE_LOGIC_AND, 2); 
-    Guard.New(protocol.CurrentSession(), 'Refund Guard for Machine nodes', refund.build()).launch();
+    const permission = param.get('permission::Permission')[0] ;
+    const service = param.get('service::Service')[0] ;
+    const guard = Guard.New(protocol.CurrentSession(), 'Refund Guard for Machine nodes for Service: ' + service, refund.build());
+
+    Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, service).add_refund_guards([{guard:guard.get_object(), percent:100}]);
+    guard.launch();
 }
 
 const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     const maker = new GuardMaker();
     const progress = maker.add_constant(ValueType.TYPE_ADDRESS);
-    const completed_name = maker.add_constant(ValueType.TYPE_STRING, order_completed.name);
-    const lost_name = maker.add_constant(ValueType.TYPE_STRING, goods_lost.name);
-    const payer_forward_name = maker.add_constant(ValueType.TYPE_STRING, 'Payer confirmation');
     const payment = maker.add_constant(ValueType.TYPE_ADDRESS);
     const order = maker.add_constant(ValueType.TYPE_ADDRESS)
     maker.add_query(MODULES.progress, 'Last Session Time', progress)
