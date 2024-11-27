@@ -52,6 +52,7 @@ const discount2 : DicountDispatch = {
 export const test_service_launch = async(protocol:Protocol, param:any) => {
     let permission = param.get('permission::Permission')[0] ;
     let machine = param.get('machine::Machine')[0] ;
+    let guard = param.get('guard::Guard')[0] ;
     if (!permission || !machine) {
         console.log('test_service_launch param error')
         return ;
@@ -65,6 +66,7 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
     service.add_stock(service_sales1.item, BigInt(10000)); // increase stock
     service.set_price(service_sales2.item, BigInt(8)); // reduce price
     service.discount_transfer([discount1, discount2]);
+    service.add_withdraw_guards([{guard:guard, percent:100}]);
     service.publish(); 
     service.launch();
     t.launch();
