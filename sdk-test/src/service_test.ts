@@ -1,6 +1,7 @@
  //@ts-ignore 
 import { Protocol, Service_Discount_Type, Service_Buy, Service_Sale, Service, MachineObject, PermissionObject,
-    DicountDispatch, TxbObject, Treasury} from 'wowok';
+    DicountDispatch, TxbObject, Treasury,
+    Arbitration} from 'wowok';
 import { TEST_ADDR } from './common'
 
 
@@ -59,7 +60,8 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
     }
 
     const t = Treasury.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Order revenue Treasury');
-    
+    const a = Arbitration.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Test', BigInt(0), t.get_object());
+    a.pause(false);
     let service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'cup service', t.get_object()) ;
     service.set_machine(machine);
     service.add_sales([service_sales1, service_sales2]);
@@ -67,8 +69,10 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
     service.set_price(service_sales2.item, BigInt(8)); // reduce price
     service.discount_transfer([discount1, discount2]);
     service.add_withdraw_guards([{guard:guard, percent:100}]);
+    service.add_arbitration(a.get_object(), SERVICE_PAY_TYPE);
     service.publish(); 
     service.launch();
+    a.launch();
     t.launch();
 }
 

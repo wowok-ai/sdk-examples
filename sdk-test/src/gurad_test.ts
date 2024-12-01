@@ -15,10 +15,6 @@ export const test_guard_launch_creator_equal = async(protocol:Protocol, param:an
     Guard.New(protocol.CurrentSession(), 'two permissions\' creator equal', sense1).launch(); // guard1
 }
 
-export const test_guard_launch_signer = async(protocol:Protocol, param:any) => {
-    Guard.signer_guard(protocol.CurrentSession())
-}
-
 export const test_guard_launch_everyone = async(protocol:Protocol, param:any) => {
     Guard.everyone_guard(protocol.CurrentSession())
 }

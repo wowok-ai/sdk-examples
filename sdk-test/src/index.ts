@@ -2,7 +2,7 @@
 import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok, } from 'wowok';
 import { TEST_PRIV, TEST_ADDR } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission_test'
-import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_signer, test_guard_launch_substring,
+import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_substring,
     test_guard_launch_number, test_guard_launch_creator_equal, test_constant_launch_creator_equal, 
     test_guard_passport, test_guard_future_object, test_guard_to_object, test_guard_true, passport_query} from './gurad_test'
 import { test_repository_launch, test_repository_policy } from './repository_test'
@@ -70,8 +70,8 @@ const test_guard_queries = async (protocol:Protocol) => {
 
 const test_exes = async (protocol:Protocol) => {
     let ids = new Map<string, TxbObject[]>();
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids); await sleep(2000)
+    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids); await sleep(2000)
     console.log('permission id: ' + ids.get('permission::Permission'));  await sleep(2000);
     // object random sequence by rpc-get-objects !!  
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_guard_true], TEST_PRIV(), ids), ids);
@@ -97,8 +97,9 @@ const test_exes = async (protocol:Protocol) => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run1], TEST_PRIV(), ids));
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run2], TEST_PRIV(), ids));
     console.log('run progress ready.')
+
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
-        [test_service_launch, test_demand_launch,  test_service_launch], TEST_PRIV(), ids), ids);
+        [test_service_launch, test_demand_launch,  test_service_launch], TEST_PRIV(), ids), ids); await sleep(2000)
     console.log('service id: ' + ids.get('service::Service'))
     console.log('discount id: ' + ids.get('order::Discount'))
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
