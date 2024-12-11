@@ -33,7 +33,7 @@ export const node_order_signed:Machine_Node = {
     name: 'order signed',
     pairs: [
         {prior_node: node_order_delivered.name, threshold:0, forwards:[
-            {name:'payer signed', namedOperator: Machine.OPERATOR_ORDER_PAYER},
+            {name:'payer signed', namedOperator: 'TESTOR'},
         ]},
     ]
 }
@@ -41,15 +41,15 @@ export const node_order_canceled:Machine_Node = {
     name: 'order canceled',
     pairs: [
         {prior_node: Machine.INITIAL_NODE_NAME, threshold:0, forwards:[
-            {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: 'TESTOR'},
             {name:'service canceled',  permission: 10000},
         ]},
         {prior_node: node_order_delivered.name, forwards:[
-            {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: 'TESTOR'},
             {name:'express canceled', namedOperator:'EXPRESS'}
         ]},
         {prior_node: node_order_signed.name, forwards:[
-            {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: 'TESTOR'},
             {name:'service canceled', permission: 10001}
         ]},
     ]
@@ -92,15 +92,15 @@ export const node_order_canceled2:Machine_Node = {
     name: 'order canceled',
     pairs: [
         {prior_node: Machine.INITIAL_NODE_NAME, threshold:0, forwards:[
-            {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: 'TESTOR'},
             {name:'service canceled',  permission: 10000},
         ]},
         {prior_node: node_order_delivered.name, forwards:[
-            {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: 'TESTOR'},
             {name:'express canceled', namedOperator:'EXPRESS'}
         ]},
         {prior_node: node_order_signed.name, forwards:[
-            {name:'payed canceled',  namedOperator: Machine.OPERATOR_ORDER_PAYER},
+            {name:'payed canceled',  namedOperator: 'TESTOR'},
             {name:'service canceled', permission: 10001}
         ]},
     ]
@@ -140,7 +140,7 @@ export const test_progress_run1 = async (protocol:Protocol, param:any) => {
     }
     let parent = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[0]);
 
-    parent.set_namedOperator(Machine.OPERATOR_ORDER_PAYER, [TEST_ADDR()]);
+    parent.set_namedOperator('TESTOR', [TEST_ADDR()]);
     parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
     parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, false);
     parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
