@@ -1,7 +1,7 @@
 
 import { FnCallType, PermissionObject, RepositoryObject, PassportObject, MachineObject, 
-    ProgressObject, ProgressAddress, Protocol, ValueType,
-    TxbObject} from './protocol';
+    ProgressObject, ProgressAddress, Protocol, TxbObject} from './protocol';
+import { Machine } from './machine';
 import { Bcs, array_unique,IsValidName, IsValidAddress, IsValidArray, IsValidInt  } from './utils'
 import { ERROR, Errors } from './exception';
 import { type TransactionResult, Transaction as TransactionBlock } from '@mysten/sui/transactions';
@@ -103,11 +103,13 @@ export class Progress {
         if (!IsValidName(name)) {
             ERROR(Errors.IsValidName, 'name')
         }
+        if (name === Machine.OPERATOR_ORDER_PAYER) {
+            ERROR(Errors.InvalidParam, 'name cannot be '+Machine.OPERATOR_ORDER_PAYER);
+        }
         if (addresses.length > Progress.MAX_NAMED_OPERATOR_COUNT || !IsValidArray(addresses, IsValidAddress)) {
             ERROR(Errors.InvalidParam, 'addresses')
         }
 
-        
         if (passport) {
             this.txb.moveCall({
                 target:Protocol.Instance().ProgressFn('namedOperator_set_with_passport') as FnCallType,

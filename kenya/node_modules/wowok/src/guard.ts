@@ -185,7 +185,7 @@ export class Guard {
         [MODULES.order, 'Service', 502, [], ValueType.TYPE_ADDRESS, 'Service for creating orders.', []],   
         [MODULES.order, 'Has Progress', 503, [], ValueType.TYPE_BOOL, 'Is there a Progress for executing the order process?', []],   
         [MODULES.order, 'Progress', 504, [], ValueType.TYPE_ADDRESS, 'Progress address for executing the order process.', []],       
-        [MODULES.order, 'Required Info Counts', 505, [], ValueType.TYPE_U64, 'How much customer information is required for this order?', []],
+        [MODULES.order, 'Required Info', 505, [], ValueType.TYPE_BOOL, 'Is Required Info set?', []],
         [MODULES.order, 'Discount Used', 506, [], ValueType.TYPE_BOOL, 'Discount coupon used for this order?', []],   
         [MODULES.order, 'Discount', 507, [], ValueType.TYPE_ADDRESS, 'Discount address that already used.', []], 
         [MODULES.order, 'Balance', 508, [], ValueType.TYPE_U64, 'The amount currently in the order.', []], 
