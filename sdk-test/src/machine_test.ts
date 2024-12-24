@@ -144,7 +144,7 @@ export const test_progress_run1 = async (protocol:Protocol, param:any) => {
     parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
     parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, false);
     parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, true);
-    parent.next({next_node_name:node_order_comfirmed.name, forward:'confirm order'}); // wight 5; threshold:10
+    parent.next({next_node_name:node_order_comfirmed.name, forward:'confirm order'}, {msg:'', orders:[]}); // wight 5; threshold:10
     parent.hold({next_node_name:node_order_comfirmed.name, forward:'confirm express'}, true);
 
 //    progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'});
@@ -159,7 +159,7 @@ export const test_progress_run2 = async (protocol:Protocol, param:any) => {
         return 
     }
     let progress = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[0]);
-    progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'}); // wight 5; threshold:10
+    progress.next({next_node_name:node_order_canceled.name, forward:'payed canceled'}, {msg:'', orders:[]}); // wight 5; threshold:10
     let child = Progress.From(protocol.CurrentSession(), machine, permission, param.get('progress::Progress')[1]);
 
     child.parent({parent_id:param.get('progress::Progress')[0],
