@@ -1,5 +1,5 @@
 
-# Wowok
+# WoWok
 
 Create, collaborate, and transact on your own terms with the AI-driven web3 collaboration protocol.
 
@@ -27,5 +27,8 @@ The protocol address may change due to protocol upgrade. Please update the SDK t
 * Encrypted personal information transfer and order management
 * Support compensation and dispute voting arbitration
 
-#### [See more examples](https://github.com/wowok-ai/sdk-examples)
+#### [How can social resources collaborate to meet a Kenya 10-day personalized travel dream](https://github.com/wowok-ai/sdk-examples/tree/main/kenya)
+* Demand + Service + Machine/Progress + Order + Permission + Treasury + Arbitration
+
+#### [See more examples...](https://github.com/wowok-ai/sdk-examples)
   

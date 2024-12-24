@@ -1,18 +1,24 @@
 import { Transaction as TransactionBlock, TransactionObjectArgument, type TransactionResult } from '@mysten/sui/transactions';
-import { Protocol, FnCallType, PermissionObject, RepositoryObject,  PassportObject, MachineObject, MachineAddress,  GuardObject, TxbObject} from './protocol';
+import { Protocol, FnCallType, PermissionObject, RepositoryObject,  PassportObject, MachineObject, MachineAddress,  GuardObject, TxbObject, ServiceObject} from './protocol';
 import { IsValidInt, Bcs, array_unique, IsValidArray, IsValidAddress, IsValidName, IsValidName_AllowEmpty, 
-    IsValidEndpoint, IsValidDesription, IsValidU64 } from './utils'
+    IsValidEndpoint, IsValidDesription, IsValidU64, 
+    IsValidTokenType} from './utils'
 import { Permission, PermissionIndexType } from './permission';
 import { Errors, ERROR}  from './exception'
 import { ValueType } from './protocol';
 
-
+export interface ServiceWrap {
+    object:ServiceObject,
+    pay_token_type: string,
+    bOptional: boolean,
+}
 export interface Machine_Forward {
     name: string; // foward name
     namedOperator?: string; // dynamic operator
     permission?: PermissionIndexType; // this.permission-index or named-operator MUST one defined.
     weight?: number;
     guard?: GuardObject;
+    suppliers?: ServiceWrap[];
 }
 export interface Machine_Node_Pair {
     prior_node: string;
@@ -156,6 +162,16 @@ export class Machine {
             ERROR(Errors.InvalidParam, 'forward')
         }
 
+        forward?.suppliers?.forEach((v) => {
+            if (!IsValidTokenType(v.pay_token_type)) {
+                ERROR(Errors.IsValidTokenType, 'forward.suppliers:'+v.object);
+            }
+            this.txb.moveCall({ 
+                target:Protocol.Instance().ServiceFn('add_to') as FnCallType,
+                    arguments:[this.txb.object(v.object), this.txb.pure.bool(v.bOptional), f],
+                    typeArguments:[v.pay_token_type]
+            });  
+        })
         return f
     }
 
@@ -481,7 +497,9 @@ export class Machine {
                     let forward_namedOperator = f.fields.value.fields.namedOperator;
                     let forward_permission_index = f.fields.value.fields.permission_index;
                     forwards.push({name:forward_name, namedOperator:forward_namedOperator, permission:forward_permission_index,
-                        weight:forward_weight, guard:forward_guard?forward_guard:''});
+                        weight:forward_weight, guard:forward_guard?forward_guard:'', suppliers:f.fields.value.fields.suppliers.fields.contents.map((v:any) => {
+                            return {object:v.fields.key, bOptional:v.fields.value, pay_token_type:''}
+                        })}); //@ NOTICE...
                 });
                 pairs.push({prior_node:p.fields.key, threshold:p.fields.value.fields.threshold, forwards:forwards});
             });

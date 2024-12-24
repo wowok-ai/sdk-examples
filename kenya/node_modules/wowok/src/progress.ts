@@ -1,11 +1,21 @@
 
 import { FnCallType, PermissionObject, RepositoryObject, PassportObject, MachineObject, 
-    ProgressObject, ProgressAddress, Protocol, TxbObject} from './protocol';
+    ProgressObject, ProgressAddress, Protocol, TxbObject,
+    OrderObject} from './protocol';
 import { Machine } from './machine';
-import { Bcs, array_unique,IsValidName, IsValidAddress, IsValidArray, IsValidInt  } from './utils'
+import { Bcs, array_unique,IsValidName, IsValidAddress, IsValidArray, IsValidInt, IsValidDesription, IsValidTokenType  } from './utils'
 import { ERROR, Errors } from './exception';
-import { type TransactionResult, Transaction as TransactionBlock } from '@mysten/sui/transactions';
+import { type TransactionResult, Transaction as TransactionBlock,  } from '@mysten/sui/transactions';
 
+export interface OrderWrap {
+    object: OrderObject;
+    pay_token_type: string;
+}
+
+export interface Deliverable {
+    msg: string;
+    orders: OrderWrap[];
+}
 
 export type ProgressNext = {
     next_node_name: string;
@@ -23,8 +33,7 @@ export type CurrentSessionId = TransactionResult;
 export interface Holder {
     forward: string;
     who?:string;
-    sub_progress?:string;
-    deliverables?:string;
+    deliverable: Deliverable;
     accomplished:boolean;
 }
 export interface Session {
@@ -251,19 +260,37 @@ export class Progress {
         }
     }
 
-    next(next:ProgressNext, deliverables_address?:string, sub_id?:string, passport?:PassportObject) : CurrentSessionId {
+    private deliverable(deliverable:Deliverable) : TransactionResult {
+        if (!IsValidDesription(deliverable.msg)) {
+            ERROR(Errors.IsValidDesription, 'deliverable.msg')
+        }
+        if (deliverable.orders.length > 0 && !Protocol.IsValidObjects(deliverable.orders.map(v=>v.object))) {
+            ERROR(Errors.IsValidObjects, 'deliverable.orders')
+        }
+
+        const d = this.txb.moveCall({ 
+            target:Protocol.Instance().ProgressFn('deliverable_new') as FnCallType,
+            arguments: [this.txb.pure.string(deliverable.msg)],
+        })   
+        deliverable.orders.forEach(v => {
+            if (!IsValidTokenType(v.pay_token_type)) {
+                ERROR(Errors.IsValidTokenType, 'deliverable.orders:' + v.object)
+            }
+            this.txb.moveCall({ 
+                target:Protocol.Instance().OrderFn('as_deliverable') as FnCallType,
+                arguments: [this.txb.object(v.object), d],
+                typeArguments:[v.pay_token_type]
+            })   
+        })
+        return d
+    }
+
+    next(next:ProgressNext, deliverable:Deliverable, passport?:PassportObject) : CurrentSessionId {
         if (!Progress.IsValidProgressNext(next)) {
             ERROR(Errors.InvalidParam, 'next')
         }
-        if (deliverables_address && !IsValidAddress(deliverables_address)) {
-            ERROR(Errors.IsValidAddress, 'deliverables_address');
-        }
-        if (sub_id && !IsValidAddress(sub_id)) {
-            ERROR(Errors.IsValidAddress, 'sub_id');
-        }
-        
-        const diliverable = this.txb.pure.option('address', deliverables_address ? deliverables_address  : undefined);
-        const sub = this.txb.pure.option('address', sub_id ? sub_id : undefined);
+
+        const d = this.deliverable(deliverable);
         const clock = this.txb.sharedObjectRef(Protocol.CLOCK_OBJECT);
 
         if (passport) {
@@ -271,14 +298,14 @@ export class Progress {
                 target:Protocol.Instance().ProgressFn('next_with_passport') as FnCallType,
                 arguments: [passport, Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, this.machine), 
                     this.txb.pure.string(next.next_node_name), 
-                    this.txb.pure.string(next.forward), diliverable, sub, 
+                    this.txb.pure.string(next.forward), d, 
                     Protocol.TXB_OBJECT(this.txb, this.permission), this.txb.object(clock)],
             })    
         } else {
             return this.txb.moveCall({
                 target:Protocol.Instance().ProgressFn('next') as FnCallType,
                 arguments: [Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, this.machine), this.txb.pure.string(next.next_node_name), 
-                    this.txb.pure.string(next.forward), diliverable, sub, Protocol.TXB_OBJECT(this.txb, this.permission), this.txb.object(clock)],
+                    this.txb.pure.string(next.forward), d, Protocol.TXB_OBJECT(this.txb, this.permission), this.txb.object(clock)],
             })               
         }
     }
@@ -301,8 +328,8 @@ export class Progress {
             var s:Session = {next_node: v.fields.key, holders:[], weights:v.fields.value.fields.weights, threshold:v.fields.value.fields.threshold};
             v.fields.value.fields.forwards.fields.contents.forEach((i:any) => {
               s.holders.push({forward:i.fields.key, accomplished:i.fields.value.fields.accomplished, 
-                who:i.fields.value.fields.who, deliverables:i.fields.value.fields.deliverables ?? undefined,
-                sub_progress: i.fields.value.fields.sub_progress ?? undefined
+                who:i.fields.value.fields.who, deliverable:{msg:i.fields.value.fields.msg, 
+                    orders:i.fields.value.fields.orders ?? []},
               })
             })
             sessions.push(s);
@@ -320,7 +347,8 @@ export class Progress {
               weights:i.fields.value.fields.weights, threshold:i.fields.value.fields.threshold, bComplete:i.fields.key === next_node};
               i.fields.value.fields.forwards.fields.contents.forEach((k:any) => {
               s.holders.push({forward:k.fields.key, who:k.fields.value.fields.who, accomplished:k.fields.value.fields.accomplished,
-                sub_progress:k.fields.value.fields.sub_progress ?? undefined, deliverables:k.fields.value.fields.deliverables ?? undefined});
+                deliverable:{msg:k.fields.value.fields.msg, 
+                    orders:k.fields.value.fields.orders ?? []}});
             })
             sessions.push(s);
           })
@@ -329,6 +357,7 @@ export class Progress {
     }
 
     static MAX_NAMED_OPERATOR_COUNT = 20;
+    static MAX_DELEVERABLE_ORDER_COUNT = 20;
     static IsValidProgressNext = (next:ProgressNext) => {
         return IsValidName(next.forward)  && IsValidName(next.next_node_name);
     }

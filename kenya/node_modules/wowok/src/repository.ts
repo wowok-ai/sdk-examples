@@ -380,6 +380,11 @@ export class Repository {
     static MAX_KEY_LENGTH = 128;
     static MAX_VALUE_LENGTH = 204800;
     static MAX_REFERENCE_COUNT = 100;
+
+    static TYPE_NORMAL = 0;
+    static TYPE_WOWOK_GRANTEE = 1;
+    static TYPE_WOWOK_ORACLE = 2;
+
     static IsValidName = (key:string)  => {
         return key.length <= Repository.MAX_KEY_LENGTH && key.length != 0;
     }

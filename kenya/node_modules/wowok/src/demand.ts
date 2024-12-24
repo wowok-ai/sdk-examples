@@ -1,6 +1,6 @@
 import { type TransactionResult, Transaction as TransactionBlock } from '@mysten/sui/transactions';
-import { FnCallType, Protocol, PassportObject, PermissionObject, GuardObject, DemandAddress, TxbObject } from './protocol';
-import { IsValidDesription, IsValidAddress, IsValidArgType, IsValidU64, parseObjectType } from './utils'
+import { FnCallType, Protocol, PassportObject, PermissionObject, GuardObject, DemandAddress, TxbObject, ServiceObject } from './protocol';
+import { IsValidDesription, IsValidAddress, IsValidArgType, IsValidU64, parseObjectType, IsValidU8 } from './utils'
 import { Errors, ERROR}  from './exception'
 
 export class Demand {
@@ -107,16 +107,20 @@ export class Demand {
         }
     }
     
-   set_guard(guard?:GuardObject, passport?:PassportObject)  {  
+   set_guard(guard?:GuardObject, service_identifier?:number, passport?:PassportObject)  {  
         if (guard && !Protocol.IsValidObjects([guard])) {
             ERROR(Errors.IsValidObjects, 'guard');
         }
-        
+        if (service_identifier !== undefined && !IsValidU8(service_identifier)) {
+            ERROR(Errors.InvalidParam, 'set_guard.service_identifier');
+        }
+        let id =  this.txb.pure.option('u8', service_identifier !== undefined ? service_identifier : undefined);
+
         if (passport) {
             if (guard) {
                 this.txb.moveCall({
                     target:Protocol.Instance().DemandFn('guard_set_with_passport') as FnCallType,
-                    arguments:[passport, Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, guard), 
+                    arguments:[passport, Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, guard), id, 
                         Protocol.TXB_OBJECT(this.txb, this.permission)],
                     typeArguments:[this.bounty_type],
                 })            
@@ -131,7 +135,7 @@ export class Demand {
             if (guard) {
                 this.txb.moveCall({
                     target:Protocol.Instance().DemandFn('guard_set') as FnCallType,
-                    arguments:[Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, guard), 
+                    arguments:[Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, guard), id, 
                         Protocol.TXB_OBJECT(this.txb, this.permission)],
                     typeArguments:[this.bounty_type],
                 })            
@@ -202,31 +206,48 @@ export class Demand {
         })    
     }
     
-    present(service_address: string, service_pay_type:string, tips:string, passport?:PassportObject) {
+    present(service: ServiceObject | number, service_pay_type:string, tips:string, passport?:PassportObject) {
         if (!IsValidDesription(tips)) {
-            ERROR(Errors.IsValidDesription, 'tips')
+            ERROR(Errors.IsValidDesription, 'present.tips')
         }
-        if (!IsValidAddress(service_address)) {
-            ERROR(Errors.IsValidAddress, 'service_address')
-        }
-        if (!IsValidArgType(service_pay_type)) {
+        if (service_pay_type && !IsValidArgType(service_pay_type)) {
             ERROR(Errors.IsValidArgType, 'service_pay_type')
         }
-        
-        if (passport) {
-            this.txb.moveCall({
-                target:Protocol.Instance().DemandFn('present_with_passport') as FnCallType,
-                arguments:[passport, Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, service_address), 
-                    this.txb.pure.string(tips)],
-                typeArguments:[this.bounty_type, service_pay_type],
-            })   
+        if (typeof(service) === 'number') {
+            if (!IsValidU8(service) || !passport) {
+                ERROR(Errors.IsValidU8, 'present.service or present.passport')
+            }
         } else {
-            this.txb.moveCall({
-                target:Protocol.Instance().DemandFn('present') as FnCallType,
-                arguments:[Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, service_address), 
-                    this.txb.pure.string(tips)],
-                typeArguments:[this.bounty_type, service_pay_type],
-            })   
+            if (!Protocol.IsValidObjects([service])) {
+                ERROR(Errors.IsValidObjects, 'present.service')
+            }
+        }
+
+        if (passport) {
+            if (typeof(service) === 'number') {
+                this.txb.moveCall({
+                    target:Protocol.Instance().DemandFn('present_with_passport2') as FnCallType,
+                    arguments:[passport, Protocol.TXB_OBJECT(this.txb, this.object), this.txb.pure.string(tips)],
+                    typeArguments:[this.bounty_type],
+                })  
+            } else {
+                this.txb.moveCall({
+                    target:Protocol.Instance().DemandFn('present_with_passport') as FnCallType,
+                    arguments:[passport, Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, service), 
+                        this.txb.pure.string(tips)],
+                    typeArguments:[this.bounty_type, service_pay_type],
+                })  
+            }
+ 
+        } else {
+            if (typeof(service) !== 'number') {
+                this.txb.moveCall({
+                    target:Protocol.Instance().DemandFn('present') as FnCallType,
+                    arguments:[Protocol.TXB_OBJECT(this.txb, this.object), Protocol.TXB_OBJECT(this.txb, service), 
+                        this.txb.pure.string(tips)],
+                    typeArguments:[this.bounty_type, service_pay_type],
+                })                   
+            }
         } 
     }
     change_permission(new_permission:PermissionObject)  {
