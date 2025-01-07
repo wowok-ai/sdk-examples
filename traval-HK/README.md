@@ -1,5 +1,5 @@
-# e-commerce
-A complete e-commerce system similar to Amazon
+# traval-HK
+How can social resources collaborate to meet a Kenya 10-day personalized travel dream
 
 #### Test run
 ```
