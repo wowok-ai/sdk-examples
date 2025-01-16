@@ -10,9 +10,11 @@ import { test_machine_edit_nodes, test_machine_launch, test_machine_progress, te
 import { test_service_launch, test_service_order, test_service_withdraw } from './service_test';
 import { test_demand_launch, test_demand_yes } from './demand_test';
 import { create_my_resource, manage_my_resource, like, avatar, transfer_resource,  destroy_resource } from './personal_test'
+import { test_agent_objects } from './query_test';
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
+    //await test_agent_objects()
     await test_exes(protocol);
     //await test_future_objects(protocol)
     //await test_personal(protocol, ''); // old resource id
@@ -54,7 +56,7 @@ const test_future_objects = async (protocol:Protocol) => {
     RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
         [test_guard_passport], TEST_PRIV(), query), ids);
     console.log(ids); 
-//    test_guard_to_object(protocol, ids);
+    test_guard_to_object(protocol, ids);
 }
 /*
 const test_guard_queries = async (protocol:Protocol) => {

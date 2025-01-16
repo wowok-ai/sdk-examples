@@ -9,13 +9,13 @@ export const SERVICE_PAY_TYPE = Protocol.SUI_TOKEN_TYPE;
 
 const service_sales1:Service_Sale = {
     item:'cup A',
-    price: BigInt(3),
-    stock: BigInt(10111),
+    price: '3',
+    stock: '10111',
 }
 const service_sales2:Service_Sale = {
     item:'cup B',
-    price: BigInt(13),
-    stock: BigInt(22),
+    price:'12',
+    stock: '22',
 }
 const service_buy1: Service_Buy = {
     item: service_sales1.item,
