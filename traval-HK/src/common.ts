@@ -1,4 +1,6 @@
 
+import { Protocol, ENTRYPOINT } from 'wowok';
+
 export const TEST_ADDR = (): string => {  
     if (process.env.ADDR) {
         return process.env.ADDR as string 
@@ -33,3 +35,9 @@ export const TESTOR:Testor[] = [
     {address:'0x61cf31ff835cd88122be3dae246ebe506d0a1c8693ef70c38867f45357031ee4', privkey:'0x068538ad59e29f0f637cc2196b686c322217ce4cf33b12fa4a932dc5312ca037'},
 ];
 
+export function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export const PROTOCOL = new Protocol(ENTRYPOINT.testnet);
+export const PAY_TYPE = Protocol.SUI_TOKEN_TYPE; 

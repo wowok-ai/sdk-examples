@@ -1,6 +1,6 @@
 
 
-import { Repository, Repository_Policy_Data, Repository_Policy_Mode, Repository_Policy, Protocol, ValueType, Bcs, RepositoryValueType} from 'wowok';
+import { Repository, Repository_Policy_Data, Repository_Policy_Mode, Repository_Policy, Protocol, ValueType, Bcs, RepositoryValueType, Repository_Type} from 'wowok';
 
 export const test_repository_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
@@ -27,13 +27,13 @@ export const test_repository_launch = async (protocol:Protocol, param:any) => {
     let po1:Repository_Policy = {
         key:'p1',
         description:'key p1 TYPE_VEC_U8',
-        data_type:RepositoryValueType.String,
+        dataType:RepositoryValueType.String,
     };
     let po2:Repository_Policy = {
         key:'p2',
         description:'key p2 TYPE_U64',
-        data_type:RepositoryValueType.PositiveNumber,
-        permission: 10002,
+        dataType:RepositoryValueType.PositiveNumber,
+        permissionIndex: 10002,
     };
 
     r.add_policies([po1, po2]);
@@ -47,13 +47,13 @@ export const test_repository_policy = async (protocol:Protocol, param:any) => {
     let po1:Repository_Policy = {
         key:'order number',
         description:'key p1 TYPE_VEC_U8',
-        data_type:RepositoryValueType.String,
+        dataType:RepositoryValueType.String,
     };
     let po2:Repository_Policy = {
         key:'order time',
         description:'key p2 TYPE_U64',
-        data_type:RepositoryValueType.PositiveNumber,
-        permission: 10002,
+        dataType:RepositoryValueType.PositiveNumber,
+        permissionIndex: 10002,
     };
     let data_order_number:Repository_Policy_Data = {key:'order number', data:[
         {address:'0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_VEC_U8, new TextEncoder().encode('中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中'))}

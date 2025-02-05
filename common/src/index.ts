@@ -14,8 +14,8 @@ import { test_agent_objects } from './query_test';
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
-    //await test_agent_objects()
-    await test_exes(protocol);
+    await test_agent_objects()
+    //await test_exes(protocol);
     //await test_future_objects(protocol)
     //await test_personal(protocol, ''); // old resource id
 }  

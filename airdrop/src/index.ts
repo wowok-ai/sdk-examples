@@ -1,6 +1,7 @@
 
-import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser,  Permission, Guard, OperatorType, Treasury, WithdrawMode, 
+import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser,  Permission, Guard, OperatorType, Treasury, Treasury_WithdrawMode, 
     GuardMaker, MODULES, ContextType, ValueType,
+    Treasury_Operation,
 } from 'wowok';
 import { TEST_PRIV, TEST_ADDR, TESTOR } from './common'
 
@@ -55,7 +56,7 @@ const treasury_set = async (protocol:Protocol, param:any) => {
     guards.forEach((v:string, index:number) => {
         tr.add_withdraw_guard(v, BigInt(100*(index+1)));
     });
-    tr.set_withdraw_mode(WithdrawMode.GUARD_ONLY_AND_IMMUTABLE);
+    tr.set_withdraw_mode(Treasury_WithdrawMode.GUARD_ONLY_AND_IMMUTABLE);
     var desp = 'This airdrop treasury adds three withdrawal guards to define claiming operation criteria:\n';
     desp += 'Guard 1. Freshman who have never claimed can claim 300 at a time; \n';
     desp += 'Guard 2. Everyone can claim 100 for every more than 1 day; \n';
@@ -67,7 +68,7 @@ const freshman_guard = async (protocol:Protocol, param:any) => {
     const treasury = param.get('treasury::Treasury')[0] ;
     const maker = new GuardMaker();
     maker.add_param(ContextType.TYPE_SIGNER)
-        .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
+        .add_param(ValueType.TYPE_U8, Treasury_Operation.WITHDRAW)
         .add_query(MODULES.treasury, 'Has Operation with Sgr', treasury)
         .add_logic(OperatorType.TYPE_LOGIC_NOT); // !withdraw ? for TEST_ADDR
     Guard.New(protocol.CurrentSession(), 'Was it an address that never picked up this airdrop?', maker.build()).launch();
@@ -77,7 +78,7 @@ const day_guard = async (protocol:Protocol, param:any) => {
     const treasury = param.get('treasury::Treasury')[0] ;
     const maker = new GuardMaker();
     maker.add_param(ContextType.TYPE_SIGNER)
-        .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
+        .add_param(ValueType.TYPE_U8, Treasury_Operation.WITHDRAW)
         .add_query(MODULES.treasury, 'Recent Time with Op/Sgr', treasury) 
         .add_param(ValueType.TYPE_U64, 86400000) // 1 DAY
         .add_logic(OperatorType.TYPE_NUMBER_ADD, 2) // +
@@ -94,11 +95,11 @@ const frequency_guard = async (protocol:Protocol, param:any) => {
 
     maker.add_param(ValueType.TYPE_U8, 10)
         .add_param(ContextType.TYPE_SIGNER)
-        .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
+        .add_param(ValueType.TYPE_U8, Treasury_Operation.WITHDRAW)
         .add_query(MODULES.treasury, 'Operation at Least Times by a Signer', tr) 
 
         .add_param(ContextType.TYPE_SIGNER)
-        .add_param(ValueType.TYPE_U8, Treasury.OP_WITHDRAW)
+        .add_param(ValueType.TYPE_U8, Treasury_Operation.WITHDRAW)
         .add_query(MODULES.treasury, 'Recent Time with Op/Sgr', tr) 
         .add_param(ValueType.TYPE_U64, 86400000) // 1 DAY
         .add_logic(OperatorType.TYPE_NUMBER_ADD, 2) // +

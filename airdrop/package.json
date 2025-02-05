@@ -21,8 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "@mysten/bcs": "^0.11.1",
-    "@mysten/sui": "^1.7.0",
-    "esm": "^3.2.25"
+    "@mysten/sui": "^1.7.0"
   },
   "devDependencies": {
     "tsx": "^4.7.1",

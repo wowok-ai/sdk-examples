@@ -1,21 +1,16 @@
-import { OBJECT_QUERY, PERMISSION_QUERY, ENTITY_QUERY } from "wowok"
+import { OBJECT_QUERY, PERMISSION_QUERY, EVENT_QUERY } from "wowok"
 import { MultiGetObjectsParams } from '@mysten/sui/client';
 
 export const test_agent_objects = async () => {
-    console.log(JSON.stringify(await OBJECT_QUERY.objects({objects:[
-        '0x530ad97f7c559b9eaf2b74b1251ce6052686a5e0a334ab8be1313fcba93e5901',
-        /*'0x1ea2ed93e8ff70404a5967dc9e7493985754487ce79b64533698efb46893a074',
-        '0xe82f30fd320f7c7b200531f55d35189cdccdd6aaccd7de140fb7fae148302bf7',
-        '0x282dba46e0e22dc1be637aaad90d7efd431d16ea9883adcdff9dc14f597a90cc'
-        '0x3f040796846f562841dd15c78b4bb93bfa69264f758f34036d3bb676687c1c01'*/], 
-        showContent:true, showOwner:true, showType:true})));
-    //await objects();
-    //await permissions();
-    //await entity();
-    /*console.log(await ObjectQuery.table_json(JSON.stringify({parent:'0xbfae0980178609bfb148e1ef38ce4f50c99eae7e038293a485275974e9a15947'})));
-    console.log(await ObjectQuery.tableItem({parent:'0xbfae0980178609bfb148e1ef38ce4f50c99eae7e038293a485275974e9a15947',
-        name:{type:'address', value:'0xb74463d6ab71f98e3637506030592eb23cf03ebef30ee6fc2446e4517e6535d3'}
-    }));*/
+    //console.log(JSON.stringify(await OBJECT_QUERY.table({parent:'0x074b97f7fd056ebf464e167fca74185953e051db3a623b569aac6bdc62c655e4'})));
+    console.log(JSON.stringify(await EVENT_QUERY.newOrderEvents()));
+    /*console.log(await OBJECT_QUERY.tableItem(OBJECT_QUERY.tableItemQuery_Repository(
+        '0x074b97f7fd056ebf464e167fca74185953e051db3a623b569aac6bdc62c655e4', 
+        '0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c',
+        '中国')));
+    console.log(await OBJECT_QUERY.tableItem(OBJECT_QUERY.tableItemQuery_Permission(
+        '0x74124ac3935a777584b17bfaa5e999df726c31c52fb60c4d70a551c8d8e13968', 
+        '0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f')));*/
 }
 
 const objects = async () => {
@@ -39,8 +34,4 @@ const permissions = async () => {
     console.log(await PERMISSION_QUERY.permission({permission_object:'0x7a447aa6f23934bbb37d7457dcf724227d903121465cee6c8565120bb378c5f4',
         address:'0xbdc19ffb6e69c418816aabd8cc56ab2328035bedc91506a0e59beace2d992b62'
     }))
-}
-export const entity  = async () => {
-    console.log(await ENTITY_QUERY.entity_json(JSON.stringify({address:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f', 
-        showMarks:true, showTags:true})))
 }
