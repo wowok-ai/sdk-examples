@@ -19,13 +19,13 @@ const service_sales2:Service_Sale = {
 }
 const service_buy1: Service_Buy = {
     item: service_sales1.item,
-    max_price: BigInt(3),
-    count: BigInt(200),
+    max_price: '3',
+    count: '22',
 }
 const service_buy2: Service_Buy = {
     item: service_sales2.item,
-    max_price: BigInt(13),
-    count: BigInt(1),
+    max_price: '13',
+    count: '1',
 }
     const discount1 : DicountDispatch = {
         receiver: TEST_ADDR(),

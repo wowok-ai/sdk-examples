@@ -83,13 +83,13 @@ enum BUSINESS { // business permission for Permission Object must >= 1000
 
 const permission = async (protocol:Protocol, param:any) => {
     const entities:Permission_Entity[] = [
-        {entity_address: TESTOR[0].address, permissions: [ {index:BUSINESS.confirmOrder}, ],},
-        {entity_address: TESTOR[1].address, permissions: [ {index:BUSINESS.confirmOrder}, {index:BUSINESS.shipping}],},
-        {entity_address: TESTOR[2].address, permissions: [ {index:BUSINESS.shipping}],},
-        {entity_address: TESTOR[3].address, permissions: [ {index:BUSINESS.express}, ],},
-        {entity_address: TESTOR[4].address, permissions: [ {index:BUSINESS.express}, ],},
-        {entity_address: TESTOR[5].address, permissions: [ {index:BUSINESS.finance},],},
-        {entity_address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute},],},
+        {address: TESTOR[0].address, permissions: [ {index:BUSINESS.confirmOrder}, ],},
+        {address: TESTOR[1].address, permissions: [ {index:BUSINESS.confirmOrder}, {index:BUSINESS.shipping}],},
+        {address: TESTOR[2].address, permissions: [ {index:BUSINESS.shipping}],},
+        {address: TESTOR[3].address, permissions: [ {index:BUSINESS.express}, ],},
+        {address: TESTOR[4].address, permissions: [ {index:BUSINESS.express}, ],},
+        {address: TESTOR[5].address, permissions: [ {index:BUSINESS.finance},],},
+        {address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute},],},
     ]
 
     const p = Permission.New(protocol.CurrentSession(), 'permission test');

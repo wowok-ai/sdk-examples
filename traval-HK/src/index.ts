@@ -83,13 +83,13 @@ enum BUSINESS { // business permission for Permission Object must >= 1000
 
 const permission = async (protocol:Protocol, param:any) => {
     const entities:Permission_Entity[] = [
-        {entity_address: TESTOR[0].address, permissions: [ {index:BUSINESS.confirmOrder}, ],},
-        {entity_address: TESTOR[1].address, permissions: [ {index:BUSINESS.confirmOrder}, {index:BUSINESS.preparationTrip}],},
-        {entity_address: TESTOR[2].address, permissions: [ {index:BUSINESS.preparationTrip}],},
-        {entity_address: TESTOR[3].address, permissions: [ {index:BUSINESS.ExplanatoryItinerary}, ],},
-        {entity_address: TESTOR[4].address, permissions: [ {index:BUSINESS.ExplanatoryItinerary}, ],},
-        {entity_address: TESTOR[5].address, permissions: [ {index:BUSINESS.CompleteOrder},],},
-        {entity_address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute},],},
+        {address: TESTOR[0].address, permissions: [ {index:BUSINESS.confirmOrder}, ],},
+        {address: TESTOR[1].address, permissions: [ {index:BUSINESS.confirmOrder}, {index:BUSINESS.preparationTrip}],},
+        {address: TESTOR[2].address, permissions: [ {index:BUSINESS.preparationTrip}],},
+        {address: TESTOR[3].address, permissions: [ {index:BUSINESS.ExplanatoryItinerary}, ],},
+        {address: TESTOR[4].address, permissions: [ {index:BUSINESS.ExplanatoryItinerary}, ],},
+        {address: TESTOR[5].address, permissions: [ {index:BUSINESS.CompleteOrder},],},
+        {address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute},],},
     ]
 
     const p = Permission.New(protocol.CurrentSession(), 'permission test');
@@ -202,9 +202,9 @@ const machine_publish = async (protocol:Protocol, param:any) => {
 
 const service = async (protocol:Protocol, param:any) => {
     const sales:Service_Sale[] = [
-        {item:'< One Place in Finland > Romantic Aurora 10 day tour of One place in Finland Rock Church Rovaniemi Church across 66 degrees 33 minutes North latitude clock in the Arctic Circle landmark', price: BigInt(8999), stock: BigInt(56), endpoint:'http://www.bytshs.com/lines/show_200.html'}, 
-        {item:'< Special Value > 10-day tour Kenya Rift Valley Giraffe Park Lake Navasha Park can take a hot air balloon at your own expense.', price: BigInt(24999), stock: BigInt(24), endpoint:'http://www.bytshs.com/lines/show_142.html'}, 
-        {item:'【 Shanghai Departure 】< Aida Modo Cruise > Shanghai - Jeju - Fukuoka - Shanghai 4 nights 5 days tour cabin quadruple room {Japan, Korea} Aida World Modo set sail for international voyage', price: BigInt(2199), stock: BigInt(88), endpoint:'http://www.bytshs.com/lines/show_645.html'}, 
+        {item:'< One Place in Finland > Romantic Aurora 10 day tour of One place in Finland Rock Church Rovaniemi Church across 66 degrees 33 minutes North latitude clock in the Arctic Circle landmark', price:'8999', stock: '56', endpoint:'http://www.bytshs.com/lines/show_200.html'}, 
+        {item:'< Special Value > 10-day tour Kenya Rift Valley Giraffe Park Lake Navasha Park can take a hot air balloon at your own expense.', price: '92', stock: '24', endpoint:'http://www.bytshs.com/lines/show_142.html'}, 
+        {item:'【 Shanghai Departure 】< Aida Modo Cruise > Shanghai - Jeju - Fukuoka - Shanghai 4 nights 5 days tour cabin quadruple room {Japan, Korea} Aida World Modo set sail for international voyage', price: '21', stock: '66', endpoint:'http://www.bytshs.com/lines/show_645.html'}, 
     ]
     const discount_type_a:Service_Discount = {
         name:'Select early bird discounts',  // 折扣名称
