@@ -1,7 +1,9 @@
 
 import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok, Machine_Node, Machine, Permission_Entity, 
     PermissionIndex, Permission, Service, Service_Sale, DicountDispatch, Service_Discount_Type, Service_Discount, Guard,
-    GuardMaker, MODULES, BuyRequiredEnum, ContextType, ValueType, OperatorType, Machine_Forward, Treasury, Arbitration, 
+    GuardMaker, MODULES, BuyRequiredEnum, ContextType, ValueType, OperatorType, Machine_Forward, Treasury, Arbitration,
+    PERMISSION_QUERY,
+    PermissionInfo, 
 } from 'wowok';
 import { TEST_PRIV, TEST_ADDR, TESTOR } from './common'
 
@@ -12,11 +14,11 @@ const main = async () => {
     let ids = new Map<string, TxbObject[]>();
     
     // permission
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([permission], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([permission], TEST_PRIV(), ids), ids);
     console.log('permission id: ' + ids.get('permission::Permission'));  await sleep(2000)
    
     // arbitration 
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([arbitration], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([arbitration], TEST_PRIV(), ids), ids);
     console.log('arbitration id: ' + ids.get('arbitration::Arbitration'));  await sleep(2000)
 
     // machine
@@ -24,25 +26,25 @@ const main = async () => {
     console.log('machine id: ' + ids.get('machine::Machine')); 
     
     // guard
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_confirmation_24hrs_more], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_receipt], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_payer_lost], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_lost_comfirm_compensate], TEST_PRIV(), ids), ids); // guard 3
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([guard_confirmation_24hrs_more], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([guard_receipt], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 0
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([guard_payer_lost], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([guard_lost_comfirm_compensate], TEST_PRIV(), ids), ids); // guard 3
     console.log('guard id: ' + ids.get('guard::Guard'));  
 
     // publish machine
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([machine_publish], TEST_PRIV(), ids), ids); await sleep(2000)
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([machine_publish], TEST_PRIV(), ids), ids); await sleep(2000)
 
     // service
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service], TEST_PRIV(), ids), ids); await sleep(2000)
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([service], TEST_PRIV(), ids), ids); await sleep(2000)
     console.log('service id: ' + ids.get('service::Service'));  
 
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_withdraw], TEST_PRIV(), ids), ids); await sleep(2000); // guard 1
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([guard_refund], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service_publish], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([guard_withdraw], TEST_PRIV(), ids), ids); await sleep(2000); // guard 1
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([guard_refund], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([service_publish], TEST_PRIV(), ids), ids);
 
     // test service
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([service_run], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([service_run], TEST_PRIV(), ids), ids);
     console.log(ids); 
 }  
 
@@ -51,9 +53,9 @@ function sleep(ms: number): Promise<void> {
 }
 
 const arbitration = async (protocol:Protocol, param:any) => {
-    const permission = Permission.New(protocol.CurrentSession(), 'arbitration permission');
-    const treasury = Treasury.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission.get_object(), 'arbitration treasury');
-    const t = Arbitration.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission.get_object(), 'arbitration for goods lost', BigInt(0), treasury.get_object());
+    const permission = Permission.New(protocol.sessionCurrent(), 'arbitration permission');
+    const treasury = Treasury.New(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission.get_object(), 'arbitration treasury');
+    const t = Arbitration.New(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission.get_object(), 'arbitration for goods lost', BigInt(0), treasury.get_object());
     t.pause(false);
     t.launch();
     treasury.launch();
@@ -63,7 +65,7 @@ const arbitration = async (protocol:Protocol, param:any) => {
 const service_publish = async (protocol:Protocol, param:any) => {
     const permission = param.get('permission::Permission')[0] ;
     const service = param.get('service::Service')[0];
-    Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, service).publish(); 
+    Service.From(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, service).publish(); 
 }
 
 const service_run = async (protocol:Protocol, param:any) => {
@@ -89,10 +91,10 @@ const permission = async (protocol:Protocol, param:any) => {
         {address: TESTOR[3].address, permissions: [ {index:BUSINESS.express}, ],},
         {address: TESTOR[4].address, permissions: [ {index:BUSINESS.express}, ],},
         {address: TESTOR[5].address, permissions: [ {index:BUSINESS.finance},],},
-        {address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute},],},
+        {address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute}, {index:PermissionIndex.repository_policy_description}],},
     ]
 
-    const p = Permission.New(protocol.CurrentSession(), 'permission test');
+    const p = Permission.New(protocol.sessionCurrent(), 'permission test');
 
     for (const key in BUSINESS) { // add business permissions first.
         if (isNaN(Number(key))) {
@@ -209,24 +211,24 @@ const dispute:Machine_Node = {
 const machine = async (protocol:Protocol, ids: Map<string, TxbObject[]>) => {
     const create = (protocol:Protocol, param:any) => {
         const permission = ids.get('permission::Permission')![0] ;
-        const m = Machine.New(protocol.CurrentSession(), permission, 'E-commerce Machine', 'https://wowok.net/');
+        const m = Machine.New(protocol.sessionCurrent(), permission, 'E-commerce Machine', 'https://wowok.net/');
         m.launch();
     }
     const add = (protocol:Protocol, param:any) => {
         const machine = param.get('machine::Machine')[0] ;
         const permission = ids.get('permission::Permission')![0] ;
-        const m = Machine.From(protocol.CurrentSession(), permission, machine);
+        const m = Machine.From(protocol.sessionCurrent(), permission, machine);
         m.add_node([order_confirmation, order_cancellation, order_completed, goods_shippedout, goods_lost, dispute, return_goods]);
     }
 
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([create], TEST_PRIV(), ids), ids); await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([add], TEST_PRIV(), ids), ids); await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([create], TEST_PRIV(), ids), ids); await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([add], TEST_PRIV(), ids), ids); await sleep(2000);
 }
 
 const machine_publish = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     const permission = param.get('permission::Permission')[0] ;
-    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const m = Machine.From(protocol.sessionCurrent(), permission, machine);
     m.publish();
 }
 
@@ -265,8 +267,8 @@ const service = async (protocol:Protocol, param:any) => {
     const machine = param.get('machine::Machine')[0] ;
     const arbitration = param.get('arbitration::Arbitration')[0];
 
-    const treasury = Treasury.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Order revenue Treasury');
-    const service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Top1 Toy Store in US.', treasury.get_object()) ;
+    const treasury = Treasury.New(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, 'Order revenue Treasury');
+    const service = Service.New(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, 'Top1 Toy Store in US.', treasury.get_object()) ;
     service.set_machine(machine);
     service.add_sales(sales);
     service.discount_transfer(discounts_dispatch);
@@ -286,6 +288,7 @@ const guard_confirmation_24hrs_more = async (protocol:Protocol, param:any) => {
     // Receipt will be signed by default 15 days after delivery
     const receipt = new GuardMaker();
     const receipt_progress_witness = receipt.add_constant(ValueType.TYPE_ADDRESS); // witness of Progress
+    
     receipt.add_param(ValueType.TYPE_U64, 86400000) // 24 hours
         .add_query(MODULES.progress, 'Last Session Time', receipt_progress_witness)
         .add_logic(OperatorType.TYPE_NUMBER_ADD) // +
@@ -301,9 +304,9 @@ const guard_confirmation_24hrs_more = async (protocol:Protocol, param:any) => {
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 3: progress'machine equals this machine
 
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3); // 1 and 2 and 3
-    const guard = Guard.New(protocol.CurrentSession(), 'current on node '+order_confirmation.name+ ' and current tx time >= (last session time + 24hrs)', receipt.build());
+    const guard = Guard.New(protocol.sessionCurrent(), 'current on node '+order_confirmation.name+ ' and current tx time >= (last session time + 24hrs)', receipt.build());
     const permission = param.get('permission::Permission')[0] ;
-    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const m = Machine.From(protocol.sessionCurrent(), permission, machine);
     const cancel:Machine_Forward = {name:'Goods not shipped for more than 24 hours', weight: 1, namedOperator:Machine.OPERATOR_ORDER_PAYER, guard:guard.get_object()};
     m.add_forward(order_confirmation.name, order_cancellation.name, cancel); 
     guard.launch()
@@ -328,9 +331,9 @@ const guard_receipt = async (protocol:Protocol, param:any) => {
         .add_query(MODULES.progress, 'Machine', receipt_progress_witness) 
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 3: progress'machine equals this machine
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3); // 1 and 2 and 3
-    const guard = Guard.New(protocol.CurrentSession(), 'current on node '+goods_shippedout.name+ ' and current tx time >= (last session time + 15 days)', receipt.build());
+    const guard = Guard.New(protocol.sessionCurrent(), 'current on node '+goods_shippedout.name+ ' and current tx time >= (last session time + 15 days)', receipt.build());
     const permission = param.get('permission::Permission')[0] ;
-    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const m = Machine.From(protocol.sessionCurrent(), permission, machine);
     const shipper_with_guard:Machine_Forward = {name:'Shipper comfirms after 15 days', weight: 5, permission:BUSINESS.shipping, guard:guard.get_object()};
     m.add_forward(goods_shippedout.name, order_completed.name, shipper_with_guard);
     guard.launch()
@@ -384,11 +387,11 @@ const guard_withdraw = async (protocol:Protocol, param:any) => {
     const permission = param.get('permission::Permission')[0] ;
     const service = param.get('service::Service')[0] ;
     var desp = 'Widthdraw on status: '+order_completed.name+' more than 15 days; \r\nService: '+service;
-    const guard = Guard.New(protocol.CurrentSession(), desp, withdraw.build());
+    const guard = Guard.New(protocol.sessionCurrent(), desp, withdraw.build());
 
     var desp2 = 'Widthdraw on status: '+dispute.name+' Wait 30 days to receive the results of a trusted Arbitration ' + arbitration +'. And within 30 days, the user can initiate a refund at any time based on the Arb arbitration results.';
-    const guard2 = Guard.New(protocol.CurrentSession(), desp2, withdraw2.build());
-    Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, service).add_withdraw_guards([{guard:guard.get_object(), percent:100}, {guard:guard2.get_object(), percent:100}, ]);
+    const guard2 = Guard.New(protocol.sessionCurrent(), desp2, withdraw2.build());
+    Service.From(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, service).add_withdraw_guards([{guard:guard.get_object(), percent:100}, {guard:guard2.get_object(), percent:100}, ]);
     guard.launch(); guard2.launch(); 
 }
 
@@ -413,9 +416,9 @@ const guard_payer_lost = async (protocol:Protocol, param:any) => {
         .add_query(MODULES.progress, 'Machine', progress) 
         .add_logic(OperatorType.TYPE_LOGIC_EQUAL) // 3: progress'machine equals this machine
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3); // 1 and 2 and 3
-    const guard = Guard.New(protocol.CurrentSession(), 'current on node '+order_completed.name+ ' and current tx time <= (last session time + 15 days)', maker.build());
+    const guard = Guard.New(protocol.sessionCurrent(), 'current on node '+order_completed.name+ ' and current tx time <= (last session time + 15 days)', maker.build());
     const permission = param.get('permission::Permission')[0] ;
-    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const m = Machine.From(protocol.sessionCurrent(), permission, machine);
     const f:Machine_Forward = {name:'Confirm no package received within 15 days', weight: 1, namedOperator:Machine.OPERATOR_ORDER_PAYER, guard:guard.get_object()};
     m.add_forward(order_completed.name, dispute.name, f); 
     guard.launch()
@@ -467,9 +470,9 @@ const guard_refund = async (protocol:Protocol, param:any) => {
         .add_logic(OperatorType.TYPE_LOGIC_AND, 3);  // and  
     const permission = param.get('permission::Permission')[0] ;
     const service = param.get('service::Service')[0] ;
-    const guard = Guard.New(protocol.CurrentSession(), 'Refund Guard for Machine nodes for Service: ' + service, refund.build());
-    const guard2 = Guard.New(protocol.CurrentSession(), 'By default, returns have been delivered more than 15 days for Service: ' + service, refund2.build());
-    Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, service).add_refund_guards([{guard:guard.get_object(), percent:100}, {guard:guard2.get_object(), percent:100}]);
+    const guard = Guard.New(protocol.sessionCurrent(), 'Refund Guard for Machine nodes for Service: ' + service, refund.build());
+    const guard2 = Guard.New(protocol.sessionCurrent(), 'By default, returns have been delivered more than 15 days for Service: ' + service, refund2.build());
+    Service.From(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, service).add_refund_guards([{guard:guard.get_object(), percent:100}, {guard:guard2.get_object(), percent:100}]);
     guard.launch(); guard2.launch();
 }
 
@@ -509,9 +512,9 @@ const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
     var desp = order_completed.name+'->'+goods_lost.name+':\n';
     desp += '1: Compensation 100000000 to order payer for responsing exceeding 24 hours;\n';
     desp += '2: If the status is resolved within 24 hours, no compensation will be required.';
-    const guard = Guard.New(protocol.CurrentSession(), desp, maker.build());
+    const guard = Guard.New(protocol.sessionCurrent(), desp, maker.build());
     const permission = param.get('permission::Permission')[0] ;
-    const m = Machine.From(protocol.CurrentSession(), permission, machine);
+    const m = Machine.From(protocol.sessionCurrent(), permission, machine);
     const express:Machine_Forward = {name:'Response within 24hrs if package lost', weight: 5, permission:BUSINESS.express, guard:guard.get_object()};
     m.add_forward(dispute.name, goods_lost.name, express);
     guard.launch()

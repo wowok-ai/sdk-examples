@@ -17,12 +17,12 @@ import { ERROR, Errors } from 'wowok/src/exception';
 const CUSTOMER_IDS = new Map<string, TxbObject[]>();
 
 const permission = async (protocol:Protocol, param:any) => {
-    Permission.New(protocol.CurrentSession(), 'traveller permission').launch();
+    Permission.New(protocol.sessionCurrent(), 'traveller permission').launch();
 }
 
 const demand = async (protocol:Protocol, param:any) => {
     const permission = param.get('permission::Permission')[0] ;
-    const txb = protocol.CurrentSession();
+    const txb = protocol.sessionCurrent();
     // 3 days
     Demand.New(txb, PAY_TYPE, true, 259200000, permission, '', txb.splitCoins(txb.gas, [1000])).launch();
 }
@@ -35,14 +35,14 @@ export const customer_yes = async (service_addr:string) => {
     if (!permission || permission.length === 0) ERROR(Errors.Fail, 'demand.yes.permission');
     if (!demand || demand.length === 0) ERROR(Errors.Fail, 'demand.yes.demand');
 
-    const txb = PROTOCOL.CurrentSession();
+    const txb = PROTOCOL.sessionCurrent();
     Demand.From(txb, PAY_TYPE, permission![0], demand![0]).yes(service_addr);
 }
 
 export const customer_demand = async () => {
-    RpcResultParser.objectids_from_response(PROTOCOL, await PROTOCOL.SignExcute([permission], TEST_PRIV(), CUSTOMER_IDS), CUSTOMER_IDS);
+    RpcResultParser.objectids_from_response(PROTOCOL, await PROTOCOL.sign_excute([permission], TEST_PRIV(), CUSTOMER_IDS), CUSTOMER_IDS);
     console.log('customer permission id: ' + CUSTOMER_IDS.get('permission::Permission'));  await sleep(2000);
 
-    RpcResultParser.objectids_from_response(PROTOCOL, await PROTOCOL.SignExcute([demand], TEST_PRIV(), CUSTOMER_IDS), CUSTOMER_IDS);
+    RpcResultParser.objectids_from_response(PROTOCOL, await PROTOCOL.sign_excute([demand], TEST_PRIV(), CUSTOMER_IDS), CUSTOMER_IDS);
     console.log('customer demand id: ' + CUSTOMER_IDS.get('permission::Permission'));  await sleep(2000);
 }

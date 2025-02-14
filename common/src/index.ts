@@ -26,34 +26,34 @@ const sleep = (ms: number): Promise<void> => {
 
 const test_personal = async (protocol:Protocol, old_personal_resource:string) => {
     if (old_personal_resource) {
-        RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([destroy_resource], TEST_PRIV(), old_personal_resource));
+        RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([destroy_resource], TEST_PRIV(), old_personal_resource));
     }
 
     let ids = new Map<string, TxbObject[]>();
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([create_my_resource], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([create_my_resource], TEST_PRIV(), ids), ids);
     console.log('resource id: ' + ids.get('resource::Resource'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([manage_my_resource], TEST_PRIV(), ids), ids);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([like, avatar], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([manage_my_resource], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([like, avatar], TEST_PRIV(), ids), ids);
 }
 
 const test_future_objects = async (protocol:Protocol) => {
     let ids = new Map<string, string[]>();
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_permission_launch], TEST_PRIV(), ids), ids);
     console.log('permission id: ' + ids.get('permission::Permission')); await sleep(3000)
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_permission_launch], TEST_PRIV(), ids), ids);
     console.log('permission id: ' + ids.get('permission::Permission')); await sleep(3000)
     // object random sequence by rpc-get-objects !!  
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_machine_launch], TEST_PRIV(), ids), ids);
     console.log('machine id: ' + ids.get('machine::Machine')); await sleep(1000)
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_machine_progress], TEST_PRIV(), ids), ids);
     console.log('progress id: ' + ids.get('progress::Progress')); await sleep(1000)
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_guard_future_object], TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard')); await sleep(6000);
     const query = await passport_query(ids);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_guard_passport], TEST_PRIV(), query), ids);
     console.log(ids); 
     test_guard_to_object(protocol, ids);
@@ -61,9 +61,9 @@ const test_future_objects = async (protocol:Protocol) => {
 /*
 const test_guard_queries = async (protocol:Protocol) => {
     let ids = new Map<string, TxbObject[]>();
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch, test_permission_launch], TEST_PRIV()), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_permission_launch, test_permission_launch], TEST_PRIV()), ids);
     console.log('permission id: ' + ids.get('permission::Permission'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_guard_launch_creator_equal], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_guard_launch_creator_equal], TEST_PRIV(), ids), ids);
     console.log('guard id:  ' + ids.get('guard::Guard'))
     await sleep(10000) // wait query effective, important!
     let res = await test_guard_graphql_senses_objects(protocol, ids.get('guard::Guard') as string[]); 
@@ -72,44 +72,44 @@ const test_guard_queries = async (protocol:Protocol) => {
 
 const test_exes = async (protocol:Protocol) => {
     let ids = new Map<string, TxbObject[]>();
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids); await sleep(2000)
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_permission_launch], TEST_PRIV(), ids), ids); await sleep(2000)
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_permission_launch], TEST_PRIV(), ids), ids); await sleep(2000)
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_permission_launch], TEST_PRIV(), ids), ids); await sleep(2000)
     console.log('permission id: ' + ids.get('permission::Permission'));  await sleep(2000);
     // object random sequence by rpc-get-objects !!  
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_guard_true], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_guard_true], TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));  await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_constant_launch_creator_equal], TEST_PRIV(), ids), ids);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_constant_launch_creator_equal], TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));  await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_guard_launch_creator_equal], 
         TEST_PRIV(), ids), ids);
     console.log('guard id: ' + ids.get('guard::Guard'));  await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_permission_set_guard, test_guard_launch_number, test_guard_launch_permission_builder], TEST_PRIV(), ids), ids);     await sleep(2000); 
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_repository_launch], TEST_PRIV(), ids), ids);  await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_repository_launch], TEST_PRIV(), ids), ids);  await sleep(2000);
     console.log('repository id: ' + ids.get('repository::Repository'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_repository_policy], TEST_PRIV(), ids), ids);  await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_machine_launch], TEST_PRIV(), ids), ids);  await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_repository_policy], TEST_PRIV(), ids), ids);  await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_machine_launch], TEST_PRIV(), ids), ids);  await sleep(2000);
     console.log('machine id: ' + ids.get('machine::Machine'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_machine_edit_nodes, test_machine_progress], TEST_PRIV(), ids), ids);
     console.log('progress id: ' + ids.get('progress::Progress'));  await sleep(2000);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_machine_progress], TEST_PRIV(), ids), ids);  await sleep(2000);
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_machine_progress], TEST_PRIV(), ids), ids);  await sleep(2000);
     console.log('progress id: ' + ids.get('progress::Progress'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run1], TEST_PRIV(), ids));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute([test_progress_run2], TEST_PRIV(), ids));
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_progress_run1], TEST_PRIV(), ids));
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([test_progress_run2], TEST_PRIV(), ids));
     console.log('run progress ready.')
 
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_service_launch, test_demand_launch,  test_service_launch], TEST_PRIV(), ids), ids); await sleep(2000)
     console.log('service id: ' + ids.get('service::Service'))
     console.log('discount id: ' + ids.get('order::Discount'))
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_service_order], TEST_PRIV(), ids), ids);
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_service_withdraw, test_demand_launch], TEST_PRIV(), ids), ids);  
     console.log('demand id: ' + ids.get('demand::Demand'));
-    RpcResultParser.objectids_from_response(protocol, await protocol.SignExcute(
+    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute(
         [test_demand_yes], TEST_PRIV(), ids), ids);
     
     console.log(ids)

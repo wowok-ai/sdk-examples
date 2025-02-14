@@ -3,7 +3,7 @@ import { SERVICE_PAY_TYPE } from './service_test'
 
 export const test_demand_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
-    let txb = protocol.CurrentSession();
+    let txb = protocol.sessionCurrent();
     let d = Demand.New(txb, Protocol.SUI_COIN_TYPE, true, 10000000000, permission_id, 'demand TEST', 
         txb.splitCoins(txb.gas, [10000000]));
     d.deposit(txb.splitCoins(txb.gas,[200000]));
@@ -23,7 +23,7 @@ export const test_demand_yes = async (protocol:Protocol, param:any) => {
         return
     }
     // demand earnest_type must equal that demand created by
-    let d = Demand.From(protocol.CurrentSession(), Protocol.SUI_COIN_TYPE, perm, param.get('demand::Demand')[0]);
+    let d = Demand.From(protocol.sessionCurrent(), Protocol.SUI_COIN_TYPE, perm, param.get('demand::Demand')[0]);
     d.present(s1, SERVICE_PAY_TYPE, 'hello, service here');
     d.present(s1, SERVICE_PAY_TYPE, 'hello, service here and we had already service more than 200 teams'); // change tips 
     d.present(s2, SERVICE_PAY_TYPE, 'SERVICE 2');

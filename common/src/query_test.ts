@@ -1,9 +1,17 @@
-import { OBJECT_QUERY, PERMISSION_QUERY, EVENT_QUERY } from "wowok"
+import { OBJECT_QUERY, PERMISSION_QUERY, EVENT_QUERY, CacheType } from "wowok"
 import { MultiGetObjectsParams } from '@mysten/sui/client';
+import { sleep } from "./common";
+import { MemeryCache, WowokCache } from "wowok/src/cache";
 
 export const test_agent_objects = async () => {
+    WowokCache.Instance().set(new MemeryCache());
+    
+    while (true) {
+        console.log(await OBJECT_QUERY.objects({objects:['0x2f8cc10e3b8392ef191490e66109be91b1e122e94a9d8f3b7f66bcaf56fd7399'], showContent:true}));
+        await sleep(2000)
+    }
     //console.log(JSON.stringify(await OBJECT_QUERY.table({parent:'0x074b97f7fd056ebf464e167fca74185953e051db3a623b569aac6bdc62c655e4'})));
-    console.log(JSON.stringify(await EVENT_QUERY.newOrderEvents()));
+    //console.log(JSON.stringify(await EVENT_QUERY.newOrderEvents()));
     /*console.log(await OBJECT_QUERY.tableItem(OBJECT_QUERY.tableItemQuery_Repository(
         '0x074b97f7fd056ebf464e167fca74185953e051db3a623b569aac6bdc62c655e4', 
         '0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c',

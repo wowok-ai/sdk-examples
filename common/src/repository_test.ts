@@ -5,7 +5,7 @@ import { Repository, Repository_Policy_Data, Repository_Policy_Mode, Repository_
 export const test_repository_launch = async (protocol:Protocol, param:any) => {
     let permission_id = param.get('permission::Permission')[0];
 
-    let r = Repository.New(protocol.CurrentSession(), permission_id, 'test repository', Repository_Policy_Mode.POLICY_MODE_FREE);
+    let r = Repository.New(protocol.sessionCurrent(), permission_id, 'test repository', Repository_Policy_Mode.POLICY_MODE_FREE);
 
     let data_order_number:Repository_Policy_Data = {key:'order number', data:[
         {address:'0xe386bb9e01b3528b75f3751ad8a1e418b207ad979fea364087deef5250a73d3f', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_VEC_U8, new TextEncoder().encode('abcd-efg-3128'))},
@@ -59,7 +59,7 @@ export const test_repository_policy = async (protocol:Protocol, param:any) => {
         {address:'0x07b1e78a99dcb13d2f1411cab294c8a54c44f03f7ab97b0a1bdecec99e1a186c', bcsBytes:Bcs.getInstance().ser(ValueType.TYPE_VEC_U8, new TextEncoder().encode('中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中中'))}
     ], value_type:ValueType.TYPE_STRING}
 
-    let r = Repository.From(protocol.CurrentSession(), permission_id, repo_id);
+    let r = Repository.From(protocol.sessionCurrent(), permission_id, repo_id);
     r.set_description('test policy');
     r.add_policies([po1, po2]); // 'order number' 'order time'
     r.remove_policies(['p2', 'p1']);

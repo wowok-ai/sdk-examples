@@ -2,7 +2,7 @@ import { Demand, DemandObject, Entity, Protocol, Resource, Entity_Info, MarkName
 import { ERROR, Errors } from 'wowok/src/exception';
 
 export const create_my_resource = (protocol:Protocol) => {
-    let wowok_entity =  Entity.From(protocol.CurrentSession());
+    let wowok_entity =  Entity.From(protocol.sessionCurrent());
     wowok_entity.create_resource();
 }
 
@@ -10,7 +10,7 @@ export const manage_my_resource =  (protocol:Protocol, param:any) => {
     let res_id = param.get('resource::Resource')[0];
     if (!res_id) ERROR(Errors.InvalidParam, 'manage_my_resource');
 
-    let resource = Resource.From(protocol.CurrentSession(), res_id);
+    let resource = Resource.From(protocol.sessionCurrent(), res_id);
     // add some to my resource
     resource.add('my collection 1',  [res_id]);
     resource.add('my collection 1',  ['0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c',
@@ -34,8 +34,8 @@ export const like = (protocol:Protocol, param: any) => {
     let res_id = param.get('resource::Resource')[0];
     if (!res_id) ERROR(Errors.InvalidParam, 'like');
 
-    let resource = Resource.From(protocol.CurrentSession(), res_id);
-    let wowok_entity =  Entity.From(protocol.CurrentSession());
+    let resource = Resource.From(protocol.sessionCurrent(), res_id);
+    let wowok_entity =  Entity.From(protocol.sessionCurrent());
     wowok_entity.mark(resource, res_id, MarkName.LikeName); // like
     wowok_entity.mark(resource, res_id, MarkName.LikeName); // unlike
 
@@ -45,7 +45,7 @@ export const like = (protocol:Protocol, param: any) => {
 }
 
 export const avatar = (protocol:Protocol, param: any) => {
-    let wowok_entity =  Entity.From(protocol.CurrentSession());
+    let wowok_entity =  Entity.From(protocol.sessionCurrent());
 /*    let personal:Entity_Info = {name:'Jack Chou', description:'hahah', avatar:'https://wowok.ai/0x123.png', twitter:'@Wowok_Ai',
         discord:'https://discord.gg/JbYneRzB8a', homepage:'https://github.com/wowok-ai/sdk/wiki'}*/
     let personal = {name:'hi'}
@@ -61,8 +61,8 @@ export const transfer_resource = (protocol:Protocol, param: any) => {
     }
     if (!res_id) ERROR(Errors.InvalidParam, 'transfer_resource');
 
-    let resource = Resource.From(protocol.CurrentSession(), res_id);
-    let wowok_entity =  Entity.From(protocol.CurrentSession());
+    let resource = Resource.From(protocol.sessionCurrent(), res_id);
+    let wowok_entity =  Entity.From(protocol.sessionCurrent());
 
     // transfer_resource param2 must has resource yet
     wowok_entity.transfer_resource(resource, '0x227b5c82e1e0bae176720fa8803e8c87cb3f8defa6d51150b2388a3270ff1f49');
@@ -77,7 +77,7 @@ export const destroy_resource = (protocol:Protocol, param: any) => {
     }
     if (!res_id) ERROR(Errors.InvalidParam, 'destroy_resource');
 
-    let resource = Resource.From(protocol.CurrentSession(), res_id);
-    let wowok_entity =  Entity.From(protocol.CurrentSession());
+    let resource = Resource.From(protocol.sessionCurrent(), res_id);
+    let wowok_entity =  Entity.From(protocol.sessionCurrent());
     wowok_entity.destroy_resource(resource);
 }

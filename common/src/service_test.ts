@@ -59,10 +59,10 @@ export const test_service_launch = async(protocol:Protocol, param:any) => {
         return ;
     }
 
-    const t = Treasury.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Order revenue Treasury');
-    const a = Arbitration.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'Test', BigInt(0), t.get_object());
+    const t = Treasury.New(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, 'Order revenue Treasury');
+    const a = Arbitration.New(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, 'Test', BigInt(0), t.get_object());
     a.pause(false);
-    let service = Service.New(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, 'cup service', t.get_object()) ;
+    let service = Service.New(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, 'cup service', t.get_object()) ;
     service.set_machine(machine);
     service.add_sales([service_sales1, service_sales2]);
     service.add_stock(service_sales1.item, BigInt(10000)); // increase stock
@@ -81,8 +81,8 @@ export const test_service_order = async(protocol:Protocol, param:any) => {
     let machine = param.get('machine::Machine')[0] ;
     let s = param.get('service::Service')[0];
 
-    let service = Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, s);
-    let txb = protocol.CurrentSession();
+    let service = Service.From(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, s);
+    let txb = protocol.sessionCurrent();
     txb.setGasBudget(10000000); // must be enough coin
     //service.buy([service_buy1, service_buy2], txb.splitCoins(txb.gas, [txb.pure(100000)]), param.get('order::Discount')[0] as string, machine);
     service.buy([service_buy1, service_buy2], txb.splitCoins(txb.gas, [txb.pure.u64(10000)]), /*param.get('order::Discount')[1], machine */);
@@ -94,7 +94,7 @@ export const test_service_withdraw = async(protocol:Protocol, param:any) => {
 /*   let permission = param.get('permission::Permission')[0] ;
     let s = param.get('service::Service')[0] ;
     let orders = param.get('order::Order') as TxbObject[];
-    let service = Service.From(protocol.CurrentSession(), SERVICE_PAY_TYPE, permission, s);
+    let service = Service.From(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, s);
 
     orders.forEach((o) => {
         service.withdraw(o, );

@@ -14,3 +14,7 @@ export const TEST_PRIV = (): string => {
         return "0xc9bbc30f72ef7d9aa674a3be1448b9267141a676b59f3f4315231617a5bbc0e8"
     }
 }
+
+export const sleep = (ms: number): Promise<void> => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
