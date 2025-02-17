@@ -1,6 +1,6 @@
 
 import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok, } from 'wowok';
-import { TEST_PRIV, TEST_ADDR } from './common'
+import { TEST_PRIV, TEST_ADDR, sleep } from './common'
 import { test_permission_launch, test_permission_set_guard } from './permission_test'
 import { test_guard_launch_permission_builder, test_guard_launch_everyone, test_guard_launch_substring,
     test_guard_launch_number, test_guard_launch_creator_equal, test_constant_launch_creator_equal, 
@@ -14,15 +14,10 @@ import { test_agent_objects } from './query_test';
 
 const main = async () => {
     let protocol = new Protocol(ENTRYPOINT.testnet)
-    await test_agent_objects()
-    //await test_exes(protocol);
+    await test_exes(protocol);
     //await test_future_objects(protocol)
     //await test_personal(protocol, ''); // old resource id
 }  
-
-const sleep = (ms: number): Promise<void> => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 const test_personal = async (protocol:Protocol, old_personal_resource:string) => {
     if (old_personal_resource) {
