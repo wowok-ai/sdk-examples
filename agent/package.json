@@ -1,0 +1,37 @@
+{
+  "name": "sdk-test",
+  "version": "1.1.1",
+  "description": "AI-oriented web3 collaboration protocol, driving innovaion and making it more likely to happen.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "module": "node",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "graphql-codegen",
+    "watch": "graphql-codegen -w"
+  },
+  "keywords": [
+    "web3",
+    "AI",
+    "wowok",
+    "sui",
+    "examples"
+  ],
+  "author": "wowok",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/client": "^3.9.10",
+    "@mysten/bcs": "^0.11.1",
+    "@mysten/sui": "^1.7.0",
+    "esm": "^3.2.25",
+    "graphql": "^16.8.1"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.2",
+    "@graphql-codegen/client-preset": "^4.2.4",
+    "@graphql-typed-document-node/core": "^3.2.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.3"
+  }
+}
