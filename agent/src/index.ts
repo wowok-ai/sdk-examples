@@ -1,5 +1,5 @@
 
-import { TEST_PRIV, TEST_ADDR, sleep } from './common'
+import { sleep } from './common'
 import { test_agent_objects } from './query_test';
 import { test_call } from './call_test';
 
