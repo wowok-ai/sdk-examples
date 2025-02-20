@@ -1,11 +1,12 @@
-import { launch_guard, CallBase, CallDemand, GuardData, ResponseData } from 'wowok_agent'
+import { call_object, CallBase, CallDemand_Data, CallGuard_Data, ResponseData } from 'wowok_agent'
 import { sleep } from './common';
 import { Account } from 'wowok_agent/src/account';
-import { OperatorType, ValueType } from '../../../wowok/src';
+import { CallResponse, OperatorType, ValueType } from '../../../wowok/src';
 
 export const test_call = async () => {
     //await test_account()
-    await guard()
+    //await guard()
+    await demand()
 }
 
 export const account = async () => {
@@ -18,27 +19,36 @@ export const account = async () => {
 }
 
 export const guard = async () => {
-    const data : GuardData = {description:'launch a guard', table:[
+    const data : CallGuard_Data = {description:'launch a guard', table:[
         {identifier:1, bWitness:true, value_type:ValueType.TYPE_STRING}
     ], root: {logic:OperatorType.TYPE_LOGIC_EQUAL, parameters:[
             {value_type:ValueType.TYPE_STRING, value:'aa'},
             {identifier:1}
         ]}
     }
+    const r = await call_object({data:data, type:'Guard'})
+    if ((r as any)?.digest) {
+        console.log(ResponseData(r as CallResponse))
+    }
+}
 
-    console.log(ResponseData(await launch_guard(data)));
+export const faucet = async () => {
+    Account.Instance().faucet();
+    console.log(Account.Instance().list());
 }
 
 export const demand = async () => {
-    Account.Instance().faucet();
-    console.log(Account.Instance().list());
-    const d = new CallDemand('0x2::coin::Coin<0x2::sui::SUI>', 'new');
-    d.guard = {address:'0x7333b947b1467dd43009077baa58154acf8fa8b139636ef0835cd17fdf057e84'};
-    d.description = 'test sdk call';
-    //d.permission = '0x361ed0a9058a25d2b0a28c98066b2973a6329d54bb294d1e1eb8d6c0d1255f72'
-    const r = await d.call();
-    if (!Array.isArray(r) && r)  {
-       console.log(ResponseData(r)) 
-    } 
-    await sleep(5000)
+    const coin = await CallBase.coin_with_balance(1); await sleep(2000)
+    if (coin) {
+        const data: CallDemand_Data = {
+            type_parameter:'0x2::coin::Coin<0x2::sui::SUI>', 
+            guard:{address:'0x7333b947b1467dd43009077baa58154acf8fa8b139636ef0835cd17fdf057e84'},
+            description:'this is some sdk test.',
+            bounty:{op:'add', object:{address:coin}}
+        }
+        const r = await call_object({data:data, type:'Demand'})
+        if ((r as any)?.digest) {
+            console.log(ResponseData(r as CallResponse))
+        }        
+    }
 }
