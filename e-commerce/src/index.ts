@@ -2,8 +2,6 @@
 import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok, Machine_Node, Machine, Permission_Entity, 
     PermissionIndex, Permission, Service, Service_Sale, DicountDispatch, Service_Discount_Type, Service_Discount, Guard,
     GuardMaker, MODULES, BuyRequiredEnum, ContextType, ValueType, OperatorType, Machine_Forward, Treasury, Arbitration,
-    PERMISSION_QUERY,
-    PermissionInfo, 
 } from 'wowok';
 import { TEST_PRIV, TEST_ADDR, TESTOR } from './common'
 
@@ -91,7 +89,7 @@ const permission = async (protocol:Protocol, param:any) => {
         {address: TESTOR[3].address, permissions: [ {index:BUSINESS.express}, ],},
         {address: TESTOR[4].address, permissions: [ {index:BUSINESS.express}, ],},
         {address: TESTOR[5].address, permissions: [ {index:BUSINESS.finance},],},
-        {address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute}, {index:PermissionIndex.repository_policy_description}],},
+        {address: TESTOR[6].address, permissions: [ {index:BUSINESS.dispute}, ],},
     ]
 
     const p = Permission.New(protocol.sessionCurrent(), 'permission test');

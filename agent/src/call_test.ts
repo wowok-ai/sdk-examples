@@ -38,7 +38,7 @@ export const faucet = async () => {
 }
 
 export const demand = async () => {
-    const coin = await CallBase.coin_with_balance(1); await sleep(2000)
+    const coin = await Account.Instance().coin_with_balance(1); await sleep(2000)
     if (coin) {
         const data: CallDemand_Data = {
             type_parameter:'0x2::coin::Coin<0x2::sui::SUI>', 

@@ -1,4 +1,4 @@
-import { Demand, DemandObject, Entity, Protocol, Resource, Entity_Info, MarkName} from 'wowok';
+import { Demand, DemandObject, Entity, Protocol, Resource, Entity_Info, GroupName} from 'wowok';
 import { ERROR, Errors } from 'wowok/src/exception';
 
 export const create_my_resource = (protocol:Protocol) => {
@@ -36,12 +36,12 @@ export const like = (protocol:Protocol, param: any) => {
 
     let resource = Resource.From(protocol.sessionCurrent(), res_id);
     let wowok_entity =  Entity.From(protocol.sessionCurrent());
-    wowok_entity.mark(resource, res_id, MarkName.LikeName); // like
-    wowok_entity.mark(resource, res_id, MarkName.LikeName); // unlike
+    wowok_entity.mark(resource, res_id, GroupName.LikeName); // like
+    wowok_entity.mark(resource, res_id, GroupName.LikeName); // unlike
 
-    wowok_entity.mark(resource, '0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c', MarkName.LikeName); // like
-    wowok_entity.mark(resource, '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09', MarkName.LikeName);
-    wowok_entity.mark(resource, res_id, MarkName.DislikeName); // dislike
+    wowok_entity.mark(resource, '0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c', GroupName.LikeName); // like
+    wowok_entity.mark(resource, '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09', GroupName.LikeName);
+    wowok_entity.mark(resource, res_id, GroupName.DislikeName); // dislike
 }
 
 export const avatar = (protocol:Protocol, param: any) => {
