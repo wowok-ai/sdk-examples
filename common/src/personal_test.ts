@@ -1,4 +1,4 @@
-import { Demand, DemandObject, Entity, Protocol, Resource, Entity_Info, GroupName} from 'wowok';
+import { Demand, DemandObject, Entity, Protocol, Resource, Entity_Info, TagName} from 'wowok';
 import { ERROR, Errors } from 'wowok/src/exception';
 
 export const create_my_resource = (protocol:Protocol) => {
@@ -12,22 +12,7 @@ export const manage_my_resource =  (protocol:Protocol, param:any) => {
 
     let resource = Resource.From(protocol.sessionCurrent(), res_id);
     // add some to my resource
-    resource.add('my collection 1',  [res_id]);
-    resource.add('my collection 1',  ['0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c',
-        '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09',
-        '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09'
-    ]);
-    resource.add('my collection 2',  ['0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c',
-        '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f08',
-    ]);
-    resource.add('my collection 3',  ['0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09']);
-    resource.remove('my collection 2', ['0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09']);
-    resource.remove('my collection 3', [], true);
-    resource.rename('my collection 2', 'my collection 5');
-
-    resource.add_tags(res_id, 'i like it.......................', ['a', 'b', 'abc']);
-    resource.add_tags('0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c', 'i dislike it.......................', ['a', 'b']);
-    resource.remove_tags('0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c');
+    resource.add('0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c',  ['abc', 'my fovor'], '小明');
 }
 
 export const like = (protocol:Protocol, param: any) => {
@@ -36,12 +21,12 @@ export const like = (protocol:Protocol, param: any) => {
 
     let resource = Resource.From(protocol.sessionCurrent(), res_id);
     let wowok_entity =  Entity.From(protocol.sessionCurrent());
-    wowok_entity.mark(resource, res_id, GroupName.LikeName); // like
-    wowok_entity.mark(resource, res_id, GroupName.LikeName); // unlike
+    wowok_entity.mark(resource, res_id, TagName.Like); // like
+    wowok_entity.mark(resource, res_id, TagName.Like); // unlike
 
-    wowok_entity.mark(resource, '0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c', GroupName.LikeName); // like
-    wowok_entity.mark(resource, '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09', GroupName.LikeName);
-    wowok_entity.mark(resource, res_id, GroupName.DislikeName); // dislike
+    wowok_entity.mark(resource, '0xb31312cabe21e089dcd640fab507e133029528fcbbedfb34b91f849a4dd1383c', TagName.Like); // like
+    wowok_entity.mark(resource, '0x0b228d3994b147b82f970c399d3c96001442d5cc88bf073617b0957f6d421f09', TagName.Like);
+    wowok_entity.mark(resource, res_id, TagName.Dislike); // dislike
 }
 
 export const avatar = (protocol:Protocol, param: any) => {
