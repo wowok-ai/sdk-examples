@@ -1,6 +1,5 @@
 
-import { call_object, CallDemand_Data, CallGuard_Data, CallPermission_Data, CallTreasury_Data, ResponseData, WOWOK } from 'wowok_agent'
-import { sleep } from './common';
+import { call_object, CallGuard_Data, CallTreasury_Data, ResponseData, WOWOK } from 'wowok_agent'
 import { Account } from 'wowok_agent/src/account';
 
 export const airdrop = async () => {
@@ -44,10 +43,6 @@ export const airdrop = async () => {
     }
     console.log('guards: '+guards);
 
-    /*
-    const guards = ['0x5271e55fca860f98b7652d9e9f8b359478e316e48673facf14759f2649b6ac2c', 
-        '0x01bcd50ede35127614802f33c10c67b0c44b43cb2118fc843d6bfb2b787180ea',
-        '0x255f3cd0039a4f7e94615e21ea61557f2cdb23a7a53d97be8e1f7c90fd698f6c'] */
     const treasury_modify: CallTreasury_Data = {withdraw_guard:{op:'add', data:guards.map((v,i) => {return {guard:v, amount:1+i}})},
         type_parameter: TYPE, object:{address:treasury_id!}, permission:{address:permission_id!}, // reference of Treasury created.
         withdraw_mode:WOWOK.Treasury_WithdrawMode.GUARD_ONLY_AND_IMMUTABLE};

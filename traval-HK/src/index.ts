@@ -1,12 +1,7 @@
 
 import { Protocol, ENTRYPOINT, TxbObject, RpcResultParser, GuardParser, Wowok, Machine_Node, Machine, Permission_Entity, 
     PermissionIndex, Permission, Service, Service_Sale, DicountDispatch, Service_Discount_Type, Service_Discount, Guard,
-    GuardMaker, MODULES,
-    ContextType,
-    ValueType,
-    OperatorType,
-    Machine_Forward,
-    Treasury, 
+    GuardMaker, MODULES, ContextType, ValueType, OperatorType, Machine_Forward, Treasury, 
 } from 'wowok';
 import { TEST_PRIV, TEST_ADDR, TESTOR } from './common'
 
@@ -96,7 +91,7 @@ const permission = async (protocol:Protocol, param:any) => {
 
     for (const key in BUSINESS) { // add business permissions first.
         if (isNaN(Number(key))) {
-            p.add_userdefine(parseInt(BUSINESS[key]), key)
+            p.add_bizPermission(parseInt(BUSINESS[key]), key)
         }
     }
 

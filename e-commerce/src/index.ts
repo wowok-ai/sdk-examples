@@ -41,8 +41,6 @@ const main = async () => {
     RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([guard_refund], TEST_PRIV(), ids), ids);  await sleep(2000); // guard 2
     RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([service_publish], TEST_PRIV(), ids), ids);
 
-    // test service
-    RpcResultParser.objectids_from_response(protocol, await protocol.sign_excute([service_run], TEST_PRIV(), ids), ids);
     console.log(ids); 
 }  
 
@@ -64,12 +62,6 @@ const service_publish = async (protocol:Protocol, param:any) => {
     const permission = param.get('permission::Permission')[0] ;
     const service = param.get('service::Service')[0];
     Service.From(protocol.sessionCurrent(), SERVICE_PAY_TYPE, permission, service).publish(); 
-}
-
-const service_run = async (protocol:Protocol, param:any) => {
-    const machine = param.get('machine::Machine')[0] ;
-    const permission = param.get('permission::Permission')[0] ;
-    const service = param.get('service::Service')[0];
 }
 
 enum BUSINESS { // business permission for Permission Object must >= 1000
@@ -96,7 +88,7 @@ const permission = async (protocol:Protocol, param:any) => {
 
     for (const key in BUSINESS) { // add business permissions first.
         if (isNaN(Number(key))) {
-            p.add_userdefine(parseInt(BUSINESS[key]), key)
+            p.add_bizPermission(parseInt(BUSINESS[key]), key)
         }
     }
 
@@ -518,12 +510,5 @@ const guard_lost_comfirm_compensate = async (protocol:Protocol, param:any) => {
     guard.launch()
 }
 
-const reward = async (protocol:Protocol, param:any) => {
-
-}
-
-const test_service = async (protocol:Protocol, param:any) => {
-
-}
 
 main().catch(console.error)
